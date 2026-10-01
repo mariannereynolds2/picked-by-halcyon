@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS monthly_page_views (
+  month_key TEXT PRIMARY KEY,
+  views BIGINT NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+)
