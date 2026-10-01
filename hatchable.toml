@@ -1,4 +1,1 @@
-[[secret]]
-name = "RESEND_API_KEY"
-required = true
-description = "Send-only Resend API key for Picked by Halcyon website form notifications."
+# Picked by Halcyon
