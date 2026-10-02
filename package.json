@@ -1,0 +1,1 @@
+{"name":"picked-by-halcyon","private":true,"scripts":{"dev":"wrangler pages dev public","deploy":"wrangler pages deploy public --project-name=picked-by-halcyon"},"devDependencies":{"wrangler":"^4.0.0"}}
