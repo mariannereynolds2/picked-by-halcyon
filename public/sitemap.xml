@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://picked.halcyonliterary.com/</loc>
+  </url>
+
+  <url>
+    <loc>https://picked.halcyonliterary.com/picks.html</loc>
+  </url>
+
+  <url>
+    <loc>https://picked.halcyonliterary.com/genres.html</loc>
+  </url>
+
+  <url>
+    <loc>https://picked.halcyonliterary.com/authors.html</loc>
+  </url>
+
+  <url>
+    <loc>https://picked.halcyonliterary.com/about.html</loc>
+  </url>
+
+  <url>
+    <loc>https://picked.halcyonliterary.com/submit.html</loc>
+  </url>
+
+</urlset>
