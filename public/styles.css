@@ -204,3 +204,4 @@
 .inbox-item p{margin:5px 0;line-height:1.5;font-size:14px}
 .inbox-meta{font-size:11px;color:#8e7768}
 @media(max-width:900px){.admin-grid{grid-template-columns:1fr}}
+.team-photo-placeholder{display:flex;align-items:center;justify-content:center;background:#e7d5c4;color:#302621;font-family:"Playfair Display",serif;font-size:2rem;font-weight:700;letter-spacing:.04em}
