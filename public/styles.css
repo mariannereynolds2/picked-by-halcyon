@@ -205,3 +205,17 @@
 .inbox-meta{font-size:11px;color:#8e7768}
 @media(max-width:900px){.admin-grid{grid-template-columns:1fr}}
 .team-photo-placeholder{display:flex;align-items:center;justify-content:center;background:#e7d5c4;color:#302621;font-family:"Playfair Display",serif;font-size:2rem;font-weight:700;letter-spacing:.04em}
+/* Book features retain their author and source information in the archive. */
+.feature-date{font-size:12px;color:#765f50;margin:0 0 18px}
+.book-subtitle{font-family:Georgia,serif;font-size:22px;margin:0 0 20px;line-height:1.45}
+.book-author a{text-decoration-color:#b78b70;text-underline-offset:4px}
+.book-shelves{font-size:13px;line-height:1.7;margin-top:24px;color:#6f5b4e}
+.feature-sources{margin-top:35px;padding-top:20px;border-top:1px solid #d9c7b6;font-size:12px;line-height:1.8;color:#765f50}
+.feature-author{display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:55px;align-items:center}
+.feature-author-photo{width:100%;max-height:360px;object-fit:cover;object-position:center 25%}
+.feature-author>div>p:not(.eyebrow){max-width:700px;line-height:1.8}
+.feature-author .photo-credit{font-size:11px;color:#765f50;margin-top:20px}
+.author-genre{margin-top:8px!important}
+.author-feature-link{margin-top:12px!important;font-weight:700}
+#archive,#author{scroll-margin-top:90px}
+@media(max-width:700px){.feature-author{grid-template-columns:1fr;gap:25px}.feature-author-photo{max-width:280px}.book-subtitle{font-size:19px}}

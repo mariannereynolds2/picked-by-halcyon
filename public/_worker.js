@@ -37,7 +37,7 @@ export default {
         await send(env,`New book submission - ${title}`,`<h2>New book submission</h2><p><strong>Author:</strong> ${esc(author)}</p><p><strong>Email:</strong> ${esc(address)}</p><p><strong>Book:</strong> ${esc(title)}</p><p><strong>Genre:</strong> ${esc(genre)}</p><p><strong>Book link:</strong> ${esc(link||"Not provided")}</p><p><strong>Website:</strong> ${esc(website||"Not provided")}</p><p><strong>Summary:</strong><br>${esc(summary||"Not provided")}</p><p><strong>Why it fits:</strong><br>${esc(why)}</p>`,address);
         return json({ok:true});
       }
-      if(url.pathname==="/api/metrics") return json({views:100000,readers:10000,genres:8});
+      if(url.pathname==="/api/metrics") return json({views:100000,readers:10000,genres:10});
       return env.ASSETS.fetch(request);
     }catch(e){return json({ok:false,error:"Something went wrong. Please try again."},500)}
   }

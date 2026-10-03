@@ -71,13 +71,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   const spotlight=document.querySelector("[data-book-spotlight]");
   if(spotlight){
-    const current=[
-      {title:"Blood & Stone in Scotland",author:"Jade Christy",genres:["Vampire Romantasy"],image:"/images/latest/blood-stone-scotland.webp",link:"/books/blood-stone-scotland.html",cta:"Open this pick →"},
-      {title:"Silent Code",author:"Jessie Clark",genres:["Political Techno-Thriller"],image:"/images/latest/silent-code.jpg",link:"/books/silent-code.html",cta:"Open this pick →"},
-      {title:"Kenya Safari",author:"Jim Walker",genres:["Travel & Adventure"],image:"/images/latest/kenya-safari.jpg",link:"/books/kenya-safari.html",cta:"Open this pick →"},
-      {title:"A Florist’s Guide to Homicide",author:"Tara Lush",genres:["Cozy Mystery"],image:"/images/latest/florists-guide.jpg",link:"/books/florists-guide-to-homicide.html",cta:"Open this pick →"}
-    ];
-    const archive=(window.PBH_ARCHIVE||[]).map(b=>({...b,link:b.amazon,cta:"See it on Amazon ↗"}));
+    const current=(window.PBH_CURRENT||[]).map(b=>({...b,link:b.feature,cta:"Open this pick →"}));
+    const archive=(window.PBH_ARCHIVE||[]).map(b=>({...b,link:b.feature||b.amazon,cta:b.feature?"Read why we picked it →":"See it on Amazon ↗"}));
     const books=[...current,...archive].filter(b=>b.image&&b.title);
     const cover=spotlight.querySelector("[data-spotlight-cover]");
     const title=spotlight.querySelector("[data-spotlight-title]");
@@ -115,9 +110,9 @@ document.addEventListener("DOMContentLoaded",()=>{
         cover.src=b.image; cover.alt=b.title+" by "+(b.author||"");
         title.textContent=b.title; author.textContent=b.author||"";
         genre.textContent=(b.genres&&b.genres.length?b.genres.join(" · "):"FEATURED BOOK").toUpperCase();
-        line.textContent=genreLine(b.genres||[]);
+        line.textContent=b.hook||genreLine(b.genres||[]);
         link.href=b.link||b.amazon||"#"; link.textContent=b.cta||"See it on Amazon ↗";
-        if(/^https?:/i.test(link.href)){link.target="_blank";link.rel="noopener"}else{link.removeAttribute("target");link.removeAttribute("rel")}
+        if(new URL(link.href,location.href).origin!==location.origin){link.target="_blank";link.rel="noopener"}else{link.removeAttribute("target");link.removeAttribute("rel")}
         spotlight.classList.remove("is-changing");
         if(progress){progress.style.animation="none";void progress.offsetWidth;progress.style.animation="spotlightProgress 5s linear forwards";}
       },180);
