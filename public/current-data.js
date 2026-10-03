@@ -37,7 +37,7 @@ window.PBH_CURRENT=[
       "Nonfiction"
     ],
     "image": "/images/latest/thresholds.webp",
-    "photo": "/images/featured-authors/gerry-van-den-brekel.jpg",
+    "photo": "/images/featured-authors/gerry-van-den-brekel-portrait.jpg",
     "feature": "/books/thresholds.html",
     "featuredDate": "2026-10-03",
     "amazon": "https://www.amazon.com/Thresholds-Gerry-van-den-Brekel-ebook/dp/B0G3LJ7QS3",
