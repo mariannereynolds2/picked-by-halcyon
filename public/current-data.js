@@ -1,63 +1,60 @@
 window.PBH_CURRENT=[
   {
-    "title": "Tale of Two Ends",
-    "author": "Edward M. Krauss",
+    "title": "Control!",
+    "author": "Raj Agrawal",
     "genres": [
-      "Literary Fiction",
-      "Romance"
+      "Mystery & Thriller",
+      "Horror & Science Fiction"
     ],
-    "image": "/images/latest/tale-of-two-ends.jpg",
-    "photo": "/images/featured-authors/edward-m-krauss.jpg",
-    "feature": "/books/tale-of-two-ends.html",
-    "featuredDate": "2026-10-03",
-    "amazon": "https://www.amazon.com/Tale-Two-Ends-Edward-Krauss/dp/097421616X",
-    "tag": "Contemporary Relationship Fiction",
-    "hook": "A marriage ends. Parenthood, work and the need to trust someone again carry on."
+    "image": "/images/latest/control.jpg",
+    "photo": "/images/featured-authors/raj-agrawal.jpg",
+    "feature": "/books/control.html",
+    "featuredDate": "2026-10-04",
+    "amazon": "https://www.amazon.com/dp/1734081031",
+    "tag": "Environmental & Political Thriller",
+    "hook": "An invention born from loss becomes a prize for people seeking political power."
   },
   {
-    "title": "Haunting Skies",
-    "author": "Christian Kang Bachini",
+    "title": "The Girl from Chapel Hill",
+    "author": "Vanester M. Williams",
+    "genres": [
+      "Faith & Spirituality",
+      "Mystery & Thriller"
+    ],
+    "image": "/images/latest/girl-from-chapel-hill.webp",
+    "photo": "/images/featured-authors/vanester-m-williams.jpg",
+    "feature": "/books/girl-from-chapel-hill.html",
+    "featuredDate": "2026-10-04",
+    "amazon": "https://www.amazon.com/dp/1638854785",
+    "tag": "Christian Suspense",
+    "hook": "Laura has inherited her grandmother’s faith. Believing that grace can include her is another matter."
+  },
+  {
+    "title": "Flat Earth Machine",
+    "author": "Gary J. Head",
     "genres": [
       "Horror & Science Fiction"
     ],
-    "image": "/images/latest/haunting-skies.jpg",
-    "photo": "/images/featured-authors/christian-kang-bachini.jpg",
-    "feature": "/books/haunting-skies.html",
-    "featuredDate": "2026-10-03",
-    "amazon": "https://www.amazon.com/dp/B0H86LKFLL",
-    "tag": "Science-Fiction Horror",
-    "hook": "Alien invaders have conquered Earth. A possessed child may be humanity's most dangerous chance of survival."
+    "image": "/images/latest/flat-earth-machine.jpg",
+    "photo": "/images/featured-authors/gary-j-head.jpg",
+    "feature": "/books/flat-earth-machine.html",
+    "featuredDate": "2026-10-04",
+    "amazon": "https://www.amazon.com.au/dp/1764800710",
+    "tag": "Philosophical Speculative Fiction",
+    "hook": "What can one person’s memory preserve inside a world that controls its own explanation?"
   },
   {
-    "title": "Thresholds",
-    "author": "Gerry van den Brekel",
+    "title": "Space Junker",
+    "author": "David Raine",
     "genres": [
-      "Memoir & Biography",
-      "Faith & Spirituality",
-      "Nonfiction"
+      "Horror & Science Fiction"
     ],
-    "image": "/images/latest/thresholds.webp",
-    "photo": "/images/featured-authors/gerry-van-den-brekel-portrait.jpg",
-    "feature": "/books/thresholds.html",
-    "featuredDate": "2026-10-03",
-    "amazon": "https://www.amazon.com/Thresholds-Gerry-van-den-Brekel-ebook/dp/B0G3LJ7QS3",
-    "tag": "Spiritual Memoir",
-    "hook": "Diary fragments trace a personal search through loss, identity and spiritual experience."
-  },
-  {
-    "title": "Courageous Christians",
-    "author": "Joyce Vollmer Brown",
-    "genres": [
-      "Faith & Spirituality",
-      "Memoir & Biography",
-      "Nonfiction"
-    ],
-    "image": "/images/latest/courageous-christians.jpg",
-    "photo": "/images/featured-authors/joyce-vollmer-brown.jpg",
-    "feature": "/books/courageous-christians.html",
-    "featuredDate": "2026-10-03",
-    "amazon": "https://www.moodypublishers.com/courageous-christians",
-    "tag": "Christian Family Devotional",
-    "hook": "Sixty short readings give families concrete lives to discuss alongside Scripture."
+    "image": "/images/latest/space-junker.png",
+    "photo": "",
+    "feature": "/books/space-junker.html",
+    "featuredDate": "2026-10-04",
+    "amazon": "https://www.amazon.com/dp/B0HKY4C8C9",
+    "tag": "Science-Fiction Adventure",
+    "hook": "A son inherits a buried spacecraft. An old robot remembers the father who left it behind."
   }
 ];
