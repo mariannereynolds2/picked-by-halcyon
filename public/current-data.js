@@ -1,60 +1,62 @@
 window.PBH_CURRENT=[
   {
-    "title": "Control!",
-    "author": "Raj Agrawal",
+    "title": "The Cold Shore",
+    "author": "Rachel Amphlett",
     "genres": [
-      "Mystery & Thriller",
-      "Horror & Science Fiction"
-    ],
-    "image": "/images/latest/control.jpg",
-    "photo": "/images/featured-authors/raj-agrawal.jpg",
-    "feature": "/books/control.html",
-    "featuredDate": "2026-10-04",
-    "amazon": "https://www.amazon.com/dp/1734081031",
-    "tag": "Environmental & Political Thriller",
-    "hook": "An invention born from loss becomes a prize for people seeking political power."
-  },
-  {
-    "title": "The Girl from Chapel Hill",
-    "author": "Vanester M. Williams",
-    "genres": [
-      "Faith & Spirituality",
       "Mystery & Thriller"
     ],
-    "image": "/images/latest/girl-from-chapel-hill.webp",
-    "photo": "/images/featured-authors/vanester-m-williams.jpg",
-    "feature": "/books/girl-from-chapel-hill.html",
-    "featuredDate": "2026-10-04",
-    "amazon": "https://www.amazon.com/dp/1638854785",
-    "tag": "Christian Suspense",
-    "hook": "Laura has inherited her grandmother’s faith. Believing that grace can include her is another matter."
+    "image": "/images/latest/the-cold-shore.jpg",
+    "photo": "/images/featured-authors/rachel-amphlett.webp",
+    "feature": "/books/the-cold-shore.html",
+    "featuredDate": "2026-10-05",
+    "amazon": "https://www.amazon.com/dp/B0GX32K34W",
+    "tag": "Crime Thriller & Police Procedural",
+    "hook": "An abandoned boat, a brutal discovery and a detective facing the responsibility of his first homicide case."
   },
   {
-    "title": "Flat Earth Machine",
-    "author": "Gary J. Head",
+    "title": "The Spy Keeper of Marseille",
+    "author": "Roseanna M. White",
     "genres": [
-      "Horror & Science Fiction"
+      "Romance",
+      "Historical Fiction",
+      "Faith & Spirituality"
     ],
-    "image": "/images/latest/flat-earth-machine.jpg",
-    "photo": "/images/featured-authors/gary-j-head.jpg",
-    "feature": "/books/flat-earth-machine.html",
-    "featuredDate": "2026-10-04",
-    "amazon": "https://www.amazon.com.au/dp/1764800710",
-    "tag": "Philosophical Speculative Fiction",
-    "hook": "What can one person’s memory preserve inside a world that controls its own explanation?"
+    "image": "/images/latest/spy-keeper-of-marseille.jpg",
+    "photo": "/images/featured-authors/roseanna-m-white.jpg",
+    "feature": "/books/the-spy-keeper-of-marseille.html",
+    "featuredDate": "2026-10-05",
+    "amazon": "https://www.amazon.com/dp/B0FWH6L278",
+    "tag": "Christian Historical Romance",
+    "hook": "A widowed mother leads a Resistance network while learning whether she can trust someone with her own heart."
   },
   {
-    "title": "Space Junker",
-    "author": "David Raine",
+    "title": "The Isles of the Gods",
+    "author": "Amie Kaufman",
     "genres": [
-      "Horror & Science Fiction"
+      "Fantasy",
+      "Young Adult"
     ],
-    "image": "/images/latest/space-junker.png",
-    "photo": "",
-    "feature": "/books/space-junker.html",
-    "featuredDate": "2026-10-04",
-    "amazon": "https://www.amazon.com/dp/B0HKY4C8C9",
-    "tag": "Science-Fiction Adventure",
-    "hook": "A son inherits a buried spacecraft. An old robot remembers the father who left it behind."
+    "image": "/images/latest/the-isles-of-the-gods.jpg",
+    "photo": "/images/featured-authors/amie-kaufman.webp",
+    "feature": "/books/the-isles-of-the-gods.html",
+    "featuredDate": "2026-10-05",
+    "amazon": "https://www.amazon.com/dp/0593479319",
+    "tag": "Young Adult Fantasy Adventure",
+    "hook": "Selly wants to reach her father. A prince's secret voyage pulls her into a conflict far beyond her own plans."
+  },
+  {
+    "title": "Twice the Family",
+    "author": "Julie Ryan McGue",
+    "genres": [
+      "Memoir & Biography",
+      "Nonfiction"
+    ],
+    "image": "/images/latest/twice-the-family.jpg",
+    "photo": "/images/featured-authors/julie-ryan-mcgue.jpg",
+    "feature": "/books/twice-the-family.html",
+    "featuredDate": "2026-10-05",
+    "amazon": "https://www.amazon.com/dp/164742786X",
+    "tag": "Memoir & Family",
+    "hook": "An adopted twin grows toward a life of her own while making sense of the family that shaped her."
   }
 ];
