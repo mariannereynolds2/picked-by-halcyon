@@ -1,62 +1,60 @@
-window.PBH_CURRENT=[
+window.PBH_CURRENT = [
   {
-    "title": "The Cold Shore",
-    "author": "Rachel Amphlett",
+    "title": "The Love Plot",
+    "author": "Samantha Young",
+    "genres": [
+      "Romance"
+    ],
+    "image": "/images/latest/the-love-plot.jpg",
+    "amazon": "https://www.amazon.com/dp/0593438639",
+    "feature": "/books/the-love-plot.html",
+    "tag": "Contemporary Romance",
+    "hook": "A paid fake relationship puts two very different ideas of a good life under the same roof.",
+    "photo": "/images/featured-authors/samantha-young.jpg",
+    "featuredDate": "2026-10-06"
+  },
+  {
+    "title": "The Arrangement",
+    "author": "Kiersten Modglin",
     "genres": [
       "Mystery & Thriller"
     ],
-    "image": "/images/latest/the-cold-shore.jpg",
-    "photo": "/images/featured-authors/rachel-amphlett.webp",
-    "feature": "/books/the-cold-shore.html",
-    "featuredDate": "2026-10-05",
-    "amazon": "https://www.amazon.com/dp/B0GX32K34W",
-    "tag": "Crime Thriller & Police Procedural",
-    "hook": "An abandoned boat, a brutal discovery and a detective facing the responsibility of his first homicide case."
+    "image": "/images/latest/the-arrangement.png",
+    "amazon": "https://www.amazon.com/dp/B08RS5JH69",
+    "feature": "/books/the-arrangement.html",
+    "tag": "Domestic Psychological Thriller",
+    "hook": "A marriage-saving agreement creates rules for dating other people, and leaves the most important truths unspoken.",
+    "photo": "/images/featured-authors/kiersten-modglin.jpg",
+    "featuredDate": "2026-10-06"
   },
   {
-    "title": "The Spy Keeper of Marseille",
-    "author": "Roseanna M. White",
-    "genres": [
-      "Romance",
-      "Historical Fiction",
-      "Faith & Spirituality"
-    ],
-    "image": "/images/latest/spy-keeper-of-marseille.jpg",
-    "photo": "/images/featured-authors/roseanna-m-white.jpg",
-    "feature": "/books/the-spy-keeper-of-marseille.html",
-    "featuredDate": "2026-10-05",
-    "amazon": "https://www.amazon.com/dp/B0FWH6L278",
-    "tag": "Christian Historical Romance",
-    "hook": "A widowed mother leads a Resistance network while learning whether she can trust someone with her own heart."
-  },
-  {
-    "title": "The Isles of the Gods",
-    "author": "Amie Kaufman",
+    "title": "Broken Souls and Bones",
+    "author": "LJ Andrews",
     "genres": [
       "Fantasy",
-      "Young Adult"
+      "Romance"
     ],
-    "image": "/images/latest/the-isles-of-the-gods.jpg",
-    "photo": "/images/featured-authors/amie-kaufman.webp",
-    "feature": "/books/the-isles-of-the-gods.html",
-    "featuredDate": "2026-10-05",
-    "amazon": "https://www.amazon.com/dp/0593479319",
-    "tag": "Young Adult Fantasy Adventure",
-    "hook": "Selly wants to reach her father. A prince's secret voyage pulls her into a conflict far beyond her own plans."
+    "image": "/images/latest/broken-souls-and-bones.jpg",
+    "amazon": "https://www.amazon.com/dp/0593818687",
+    "feature": "/books/broken-souls-and-bones.html",
+    "tag": "Adult Fantasy Romance",
+    "hook": "A woman whose magic makes her valuable to the crown must decide what loyalty costs when power claims her life.",
+    "photo": "/images/featured-authors/lj-andrews.png",
+    "featuredDate": "2026-10-06"
   },
   {
-    "title": "Twice the Family",
-    "author": "Julie Ryan McGue",
+    "title": "I Am Yours: A Shared Memoir",
+    "author": "Reema Zaman",
     "genres": [
       "Memoir & Biography",
       "Nonfiction"
     ],
-    "image": "/images/latest/twice-the-family.jpg",
-    "photo": "/images/featured-authors/julie-ryan-mcgue.jpg",
-    "feature": "/books/twice-the-family.html",
-    "featuredDate": "2026-10-05",
-    "amazon": "https://www.amazon.com/dp/164742786X",
-    "tag": "Memoir & Family",
-    "hook": "An adopted twin grows toward a life of her own while making sense of the family that shaped her."
+    "image": "/images/latest/i-am-yours.png",
+    "amazon": "https://www.amazon.com/dp/1948705117",
+    "feature": "/books/i-am-yours.html",
+    "tag": "Literary Memoir",
+    "hook": "A memoir about reclaiming a voice, and learning to distinguish belonging from being possessed.",
+    "photo": "/images/featured-authors/reema-zaman.jpg",
+    "featuredDate": "2026-10-06"
   }
 ];
