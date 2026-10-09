@@ -1,5 +1,51 @@
 window.PBH_ARCHIVE = [
   {
+    "title": "I Am Yours: A Shared Memoir",
+    "author": "Reema Zaman",
+    "genres": [
+      "Memoir & Biography",
+      "Nonfiction"
+    ],
+    "image": "/images/latest/i-am-yours.png",
+    "amazon": "https://www.amazon.com/dp/1948705117",
+    "feature": "/books/i-am-yours.html",
+    "featuredDate": "2026-10-06"
+  },
+  {
+    "title": "Broken Souls and Bones",
+    "author": "LJ Andrews",
+    "genres": [
+      "Fantasy",
+      "Romance"
+    ],
+    "image": "/images/latest/broken-souls-and-bones.jpg",
+    "amazon": "https://www.amazon.com/dp/0593818687",
+    "feature": "/books/broken-souls-and-bones.html",
+    "featuredDate": "2026-10-06"
+  },
+  {
+    "title": "The Arrangement",
+    "author": "Kiersten Modglin",
+    "genres": [
+      "Mystery & Thriller"
+    ],
+    "image": "/images/latest/the-arrangement.png",
+    "amazon": "https://www.amazon.com/dp/B08RS5JH69",
+    "feature": "/books/the-arrangement.html",
+    "featuredDate": "2026-10-06"
+  },
+  {
+    "title": "The Love Plot",
+    "author": "Samantha Young",
+    "genres": [
+      "Romance"
+    ],
+    "image": "/images/latest/the-love-plot.jpg",
+    "amazon": "https://www.amazon.com/dp/0593438639",
+    "feature": "/books/the-love-plot.html",
+    "featuredDate": "2026-10-06"
+  },
+  {
     "title": "Space Junker",
     "author": "David Raine",
     "genres": [

@@ -1,5 +1,51 @@
 window.PBH_AUTHORS = [
   {
+    "name": "Reema Zaman",
+    "books": [
+      "I Am Yours: A Shared Memoir"
+    ],
+    "photo": "/images/featured-authors/reema-zaman.jpg",
+    "feature": "/books/i-am-yours.html",
+    "genres": [
+      "Memoir & Biography",
+      "Nonfiction"
+    ]
+  },
+  {
+    "name": "LJ Andrews",
+    "books": [
+      "Broken Souls and Bones"
+    ],
+    "photo": "/images/featured-authors/lj-andrews.png",
+    "feature": "/books/broken-souls-and-bones.html",
+    "genres": [
+      "Fantasy",
+      "Romance"
+    ]
+  },
+  {
+    "name": "Kiersten Modglin",
+    "books": [
+      "The Arrangement"
+    ],
+    "photo": "/images/featured-authors/kiersten-modglin.jpg",
+    "feature": "/books/the-arrangement.html",
+    "genres": [
+      "Mystery & Thriller"
+    ]
+  },
+  {
+    "name": "Samantha Young",
+    "books": [
+      "The Love Plot"
+    ],
+    "photo": "/images/featured-authors/samantha-young.jpg",
+    "feature": "/books/the-love-plot.html",
+    "genres": [
+      "Romance"
+    ]
+  },
+  {
     "name": "David Raine",
     "books": [
       "Space Junker"

@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-09",
+  "assets": {
+    "/images/latest/ready-or-not.jpg": "https://chautona.com/wp-content/uploads/2013/01/smalron.jpg",
+    "/images/featured-authors/chautona-havig.jpg": "https://chautona.com/wp-content/uploads/2016/10/headshot-5x7.jpg",
+    "/images/latest/the-secretary.jpg": "https://britneyking.com/wp-content/uploads/2021/08/THE-SECRETARY-BRITNEY-KING-900x1350-1.jpg",
+    "/images/featured-authors/britney-king.jpg": "https://britneyking.com/wp-content/uploads/2017/12/BRITNEY-KING-AUTHOR-2-1024x682.jpg",
+    "/images/latest/amethysts-alchemy.jpg": "https://rachelrener.com/cdn/shop/files/A_A.jpg?v=1751148005&width=1000",
+    "/images/featured-authors/rachel-rener.jpg": "https://rachelrener.com/cdn/shop/files/rachel-rener_6f368d85-6789-4279-a669-b36c03a7ff2c.png?v=1749575218&width=800",
+    "/images/latest/fat-dogs-french-estates-part-1.jpg": "https://www.bethhaslam.com/wp-content/uploads/2020/12/Fat-Dogs-and-French-Estates-1.jpg",
+    "/images/featured-authors/beth-haslam.jpg": "https://www.bethhaslam.com/wp-content/uploads/2019/07/Beth-Haslam-author-of-Fat-Dogs-and-French-Estates.png"
+  },
+  "research": {
+    "Ready or Not": [
+      "https://chautona.com/books/ready-or-not/",
+      "https://chautona.com/start-here/if-you-like/",
+      "https://chautona.com/bio/",
+      "https://www.goodreads.com/book/show/8133047-ready-or-not"
+    ],
+    "The Secretary": [
+      "https://britneyking.com/books/the-secretary/",
+      "https://britneyking.com/books/the-secretary-duet-a-psychological-thriller-box-set/",
+      "https://britneyking.com/about/"
+    ],
+    "Amethysts & Alchemy": [
+      "https://rachelrener.com/collections/amethysts-alchemy",
+      "https://rachelrener.com/products/signed-copy-of-amethysts-alchemy",
+      "https://rachelrener.com/pages/meet-the-author",
+      "https://rachelrener.com/blogs/default-blog/c%F0%9F%90%93ck-counts"
+    ],
+    "Fat Dogs and French Estates: Part 1": [
+      "https://www.bethhaslam.com/fat-dogs-and-french-estates-part-i/",
+      "https://www.bethhaslam.com/",
+      "https://antpress.org/fat-dogs-and-french-estates-part-1/",
+      "https://www.goodreads.com/book/show/23528359-fat-dogs-and-french-estates---part-1"
+    ]
+  },
+  "note": "Editorial interpretations concern verified published premises, not claimed full-book reading. Ratings and unverified performance claims are omitted from features."
+}
