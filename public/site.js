@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const nav=document.querySelector("[data-nav]");
   if(menu&&nav) menu.addEventListener("click",()=>nav.classList.toggle("open"));
 
-  fetch("/api/metrics").then(r=>r.json()).then(data=>{
+  fetch("/api/pbh/metrics").then(r=>r.json()).then(data=>{
     document.querySelectorAll("[data-metric]").forEach(el=>{
       const key=el.dataset.metric;
       const target=Number(data[key]||0);
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       btn.disabled=true;
       try{
         const email=form.querySelector('input[name="email"]').value;
-        const r=await fetch("/api/newsletter",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+        const r=await fetch("/api/pbh/newsletter",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
         const j=await r.json();
         note.textContent=j.ok?"You're in. We'll send the good stuff.":(j.error||"Something went wrong.");
         if(j.ok) form.reset();
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       const note=submit.querySelector(".form-note");
       btn.disabled=true; note.textContent="Sending...";
       try{
-        const r=await fetch("/api/submit-book",{method:"POST",body:new FormData(submit)});
+        const r=await fetch("/api/pbh/submit-book",{method:"POST",body:new FormData(submit)});
         const j=await r.json();
         if(j.ok){ note.textContent="Got it. Your book is in our review pile."; submit.reset(); }
         else note.textContent=j.error||"Please check the form and try again.";
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       btn.disabled=true; note.textContent="Sending...";
       try{
         const payload=Object.fromEntries(new FormData(form).entries());
-        const r=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+        const r=await fetch("/api/pbh/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
         const j=await r.json();
         if(j.ok){note.textContent="Message sent. We’ll get back to you.";form.reset();}
         else note.textContent=j.error||"Please check the form and try again.";
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(spotlight){
     const current=(window.PBH_CURRENT||[]).map(b=>({...b,link:b.feature,cta:"Open this pick →"}));
     const archive=(window.PBH_ARCHIVE||[]).map(b=>({...b,link:b.feature||b.amazon,cta:b.feature?"Read why we picked it →":"See it on Amazon ↗"}));
-    const books=[...current,...archive].filter(b=>b.image&&b.title);
+    let books=[...current,...archive].filter(b=>b.image&&b.title);
     const cover=spotlight.querySelector("[data-spotlight-cover]");
     const title=spotlight.querySelector("[data-spotlight-title]");
     const author=spotlight.querySelector("[data-spotlight-author]");
@@ -123,5 +123,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     spotlight.addEventListener("mouseenter",()=>clearInterval(timer));
     spotlight.addEventListener("mouseleave",start);
     show(0);start();
+    window.addEventListener('pbh:catalog',()=>{const cur=(window.PBH_CURRENT||[]).map(b=>({...b,link:b.feature||b.amazon,cta:'Open this pick →'}));const arc=(window.PBH_ARCHIVE||[]).map(b=>({...b,link:b.feature||b.amazon,cta:b.feature?'Read why we picked it →':'See it on Amazon ↗'}));books=[...cur,...arc].filter(b=>b.image&&b.title);show(0);start()});
   }
 });
