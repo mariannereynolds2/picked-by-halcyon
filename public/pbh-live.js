@@ -20,6 +20,24 @@ function paint(d){
  if(topStrip)topStrip.innerHTML=current.map(b=>{const a=authors.find(x=>x.name.toLowerCase()===b.author.toLowerCase())||{name:b.author,books:[b.title],genres:b.genres||[],photo:b.photo||"",feature:b.feature};return authorCard({...a,books:[b.title],feature:b.feature||a.feature},false)}).join("");
  const authorGrid=$("[data-author-grid]");
  if(authorGrid){authorGrid.innerHTML=authors.filter(x=>!currentNames.has(x.name.toLowerCase())).map(x=>authorCard(x,true)).join("");const c=$("[data-author-count]");if(c)c.textContent=authors.length;}
+ const detail=$(".book-detail-hero");
+ if(detail&&location.pathname.startsWith("/books/")){
+   const selected=all.find(b=>b.feature&&new URL(b.feature,location.origin).pathname===location.pathname);
+   if(selected){
+     const set=(selector,value)=>{const el=$(selector);if(el&&value)el.textContent=value};
+     set(".book-detail-intro h1",selected.title);
+     set(".book-hook",selected.hook);
+     set(".book-detail-intro .eyebrow",(selected.status==="archive"?"PAST PICK":"TODAY'S PICK")+" · "+(selected.tag||(selected.genres||[])[0]||"FEATURED BOOK").toUpperCase());
+     const titleImg=$(".book-detail-cover");if(titleImg&&selected.image){titleImg.src=selected.image;titleImg.alt=selected.title+" by "+selected.author}
+     const by=$(".book-detail-intro .book-author a");if(by)by.textContent=selected.author;
+     const buy=$(".book-buy-row .btn-solid");if(buy&&selected.amazon){buy.href=selected.amazon;buy.textContent="Buy or view the book ↗"}
+     const author=authors.find(x=>x.name.toLowerCase()===selected.author.toLowerCase());
+     set(".feature-author h2",selected.author);
+     const portrait=$(".feature-author-photo");if(portrait&&(author?.photo||selected.photo)){portrait.src=author?.photo||selected.photo;portrait.alt=selected.author}
+     const time=$(".feature-date time");if(time&&selected.featured_date){const d=new Date(selected.featured_date+"T12:00:00Z");if(!isNaN(d.getTime())){time.dateTime=selected.featured_date;time.textContent=d.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric",timeZone:"UTC"})}}
+     if(selected.status==="archive"){const back=$(".next-pick a:first-child");if(back){back.href="/picks.html#archive";back.textContent="← Back to past picks"}}
+   }
+ }
  const team=$(".team-mini");
  if(team)team.innerHTML=(d.team||[]).map(x=>'<div class="team-card">'+(x.photo?'<img class="team-photo" src="'+safe(x.photo)+'" alt="'+esc(x.name)+'" loading="lazy">':"")+'<div><h3>'+esc(x.name)+'</h3><p>'+esc(x.bio||x.role)+'</p></div></div>').join("");
  window.dispatchEvent(new Event("pbh:catalog"));
@@ -28,6 +46,6 @@ document.addEventListener("DOMContentLoaded",()=>{
  const path=location.pathname;
  if(path.startsWith("/admin"))return;
  // Page-view tracking is performed on the server for all HTML pages.
- fetch("/api/pbh/catalog",{credentials:"same-origin"}).then(r=>r.ok?r.json():Promise.reject()).then(paint).catch(()=>{});
+ fetch("/api/pbh/catalog",{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(paint).catch(()=>{});
 });
 })();
