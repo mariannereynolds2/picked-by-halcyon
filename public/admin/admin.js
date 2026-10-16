@@ -1,7 +1,7 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const api="/api/pbh/",fields={
- books:[["title","Book title","text",1],["author","Author's name","text",1],["genres","Genre(s) — separate with commas","text",1],["image","Book cover image link","url",1],["amazon","Link to buy or learn more about the book","url",1],["hook","One-sentence introduction for readers","textarea",1],["status","Where should this book appear?","select",1,["current","archive","draft"]],["tag","Short category label (optional)","text"],["photo","Author portrait image link (optional)","url",1],["feature","Existing detailed book article link (optional)","url",1],["featured_date","Date featured (optional)","date"],["sort_index","Display order (optional)","number"]],
+ books:[["title","Book title","text",1],["author","Author's name","text",1],["genres","Choose the main book genre","genre",1],["image","Book cover image link","url",1],["amazon","Link to buy or learn more about the book","url",1],["hook","One-sentence introduction for readers","textarea",1],["status","Where should this book appear?","select",1,["current","archive","draft"]],["tag","Short category label (optional)","text"],["photo","Author portrait image link (optional)","url",1],["feature","Existing detailed book article link (optional)","url",1],["featured_date","Date featured (optional)","date"],["sort_index","Display order (optional)","number"]],
  authors:[["name","Author's name","text",1],["status","Show this author on the website?","select",1,["published","hidden"]],["books","Books by this author — separate with commas","textarea",1],["photo","Author photo link","url",1],["feature","Link to an existing feature article (optional)","url",1],["genres","Genres — separate with commas","text",1]],
  team:[["name","Team member's name","text",1],["role","Job title or role","text",1],["bio","Description for the website","textarea",1],["photo","Team member photo link","url",1],["visible","Show this person on the website?","select",0,["1","0"]],["sort_index","Display order (optional)","number"]]
 };
@@ -51,6 +51,13 @@ const statusLabels={current:"★ Today's Picks — show on homepage",archive:"Pa
 function fieldHtml(v,record){
  let [key,label,type,wide,options]=v,value=record[key]??(type==="select"?(options||[])[0]:"");
  if(Array.isArray(value))value=value.join(", ");
+ if(type==="genre"){
+   const shelfGenres=["Mystery & Thriller","Romance","Fantasy","Historical Fiction","Literary Fiction","Nonfiction","Memoir & Biography","Young Adult","Horror & Science Fiction","Faith & Spirituality"];
+   const existing=Array.isArray(record.genres)?record.genres:String(record.genres||"").split(",").map(x=>x.trim()).filter(Boolean);
+   const first=existing[0]||"";
+   if(first&&!shelfGenres.includes(first))shelfGenres.push(first);
+   return '<label class="wide">'+esc(label)+'<select name="primary_genre" required><option value="">Select a genre…</option>'+shelfGenres.map(g=>'<option value="'+esc(g)+'"'+(first===g?" selected":"")+'>'+esc(g)+'</option>').join("")+'</select><span class="field-help">Your book will appear in this genre’s shelf.</span><input type="text" name="additional_genres" value="'+esc(existing.slice(1).join(", "))+'" placeholder="Optional: extra genre, e.g. Romance"><span class="field-help">Other genres are optional. Separate them with commas.</span></label>';
+ }
  const c=' class="'+(wide?"wide":"")+'"',help={
  image:"Paste a direct image link ending in .jpg, .png or .webp, or an existing /images/... path. A visible book needs a cover.",
  amazon:"Use the Amazon product link, official bookstore link or your author website.",
@@ -89,8 +96,8 @@ async function save(e){
  e.preventDefault();if(!editing)return;
  const form=$("#editForm"),b=$("#saveEditor"),data={...editing.original,...Object.fromEntries(new FormData(form).entries())};
  if(editing.entity==="books"||editing.entity==="authors"){
-   for(const key of editing.entity==="books"?["genres"]:["books","genres"])
-   data[key]=String(data[key]||"").split(",").map(x=>x.trim()).filter(Boolean);
+   if(editing.entity==="books")data.genres=[String(data.primary_genre||"").trim(),...String(data.additional_genres||"").split(",").map(x=>x.trim()).filter(Boolean)].filter(Boolean);
+   else for(const key of ["books","genres"])data[key]=String(data[key]||"").split(",").map(x=>x.trim()).filter(Boolean);
  }
  if(editing.entity==="team")data.visible=String(data.visible)==="1";
  if(editing.entity==="books"&&data.status!=="draft"){
