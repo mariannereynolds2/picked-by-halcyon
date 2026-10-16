@@ -27,7 +27,7 @@ function paint(d){
 document.addEventListener("DOMContentLoaded",()=>{
  const path=location.pathname;
  if(path.startsWith("/admin"))return;
- try{const b=new Blob([JSON.stringify({path:path.slice(0,160)})],{type:"application/json"});if(navigator.sendBeacon)navigator.sendBeacon("/api/pbh/visit",b);else fetch("/api/pbh/visit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path}),keepalive:true}).catch(()=>{})}catch(e){}
+ // Page-view tracking is performed on the server for all HTML pages.
  fetch("/api/pbh/catalog",{credentials:"same-origin"}).then(r=>r.ok?r.json():Promise.reject()).then(paint).catch(()=>{});
 });
 })();
