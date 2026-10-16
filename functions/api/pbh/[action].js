@@ -9,6 +9,19 @@ const fields={
  team:["name","role","bio","photo","sort_index","visible"]
 };
 const tables={books:"pbh_books",authors:"pbh_authors",team:"pbh_team"};
+
+const escapeHTML=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function sendNotice(env,subject,details,replyTo){
+ if(!env.RESEND_API_KEY)return;
+ const html="<div style='font-family:Arial,sans-serif;line-height:1.7;color:#2b211d'><h2>"+escapeHTML(subject)+"</h2>"+details.map(([label,value])=>"<p><strong>"+escapeHTML(label)+":</strong> "+escapeHTML(value).replace(/\\n/g,"<br>")+"</p>").join("")+"</div>";
+ const payload={from:"Picked by Halcyon <kate@support.halcyonliterary.com>",to:["hello@halcyonliterary.com"],subject,html};
+ if(/^\\S+@\\S+\\.\\S+$/.test(replyTo||""))payload.reply_to=replyTo;
+ const r=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":"Bearer "+env.RESEND_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(payload)});
+ if(!r.ok)throw new Error("Notification delivery failed: "+r.status);
+}
+function queueNotice(context,subject,details,replyTo){
+ context.waitUntil(sendNotice(context.env,subject,details,replyTo).catch(e=>console.error("Picked notification",e.message)));
+}
 async function sign(secret,value){
  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
  const sig=await crypto.subtle.sign("HMAC",key,new TextEncoder().encode(value));
@@ -78,12 +91,14 @@ export async function onRequest(context){
    if(!author||!title||!why||!genre||!/^\S+@\S+\.\S+$/.test(email))return failure("Complete author, email, book, genre and why it fits.");
    if(b.honeypot||b.website_url)return respond({ok:true});
    await db.prepare("INSERT INTO pbh_submissions(author_name,email,book_title,genre,book_link,website,why_fit,book_summary) VALUES(?,?,?,?,?,?,?,?)").bind(author,email,title,genre,safePath(b.book_link),safePath(b.website),why,cut(b.book_summary||b.summary,7000)).run();
+   queueNotice(context,"New Picked by Halcyon book submission — "+title,[["Author",author],["Email",email],["Book",title],["Genre",genre],["Book link",safePath(b.book_link)],["Website",safePath(b.website)],["Why it fits",why],["Book summary",cut(b.book_summary||b.summary,7000)]],email);
    return respond({ok:true});
  }
  if(action==="newsletter"&&method==="POST"){
    const b=await req.json().catch(()=>({})),email=cut(b.email,250).toLowerCase();
    if(!/^\S+@\S+\.\S+$/.test(email))return failure("Enter a valid email address.");
    const r=await db.prepare("INSERT OR IGNORE INTO pbh_newsletter(email) VALUES(?)").bind(email).run();
+   if((r.meta?.changes||0)>0)queueNotice(context,"New Picked by Halcyon newsletter signup",[["Email",email]],email);
    return respond({ok:true,newSubscriber:(r.meta?.changes||0)>0});
  }
  if(action==="contact"&&method==="POST"){
@@ -91,6 +106,7 @@ export async function onRequest(context){
    if(!name||!message||!/^\S+@\S+\.\S+$/.test(email))return failure("Provide your name, email and message.");
    if(b.honeypot)return respond({ok:true});
    await db.prepare("INSERT INTO pbh_messages(name,email,subject,message) VALUES(?,?,?,?)").bind(name,email,cut(b.subject,250),message).run();
+   queueNotice(context,"New Picked by Halcyon message"+(b.subject?" — "+cut(b.subject,80):""),[["Name",name],["Email",email],["Subject",cut(b.subject,250)],["Message",message]],email);
    return respond({ok:true});
  }
  if(action==="login"&&method==="POST"){
