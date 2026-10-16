@@ -1,0 +1,4 @@
+/admin/*
+  Cache-Control: no-store
+/pbh-live.js
+  Cache-Control: public, max-age=0, must-revalidate
