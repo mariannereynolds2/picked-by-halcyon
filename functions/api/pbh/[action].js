@@ -68,7 +68,7 @@ export async function onRequest(context){
  const method=req.method,url=new URL(req.url);
  if(method==="POST"&&req.headers.get("Origin")&&req.headers.get("Origin")!==url.origin)return failure("Invalid request origin.",403);
  try{
- if(action==="catalog"&&method==="GET")return respond(await publicCatalog(db),200,{"Cache-Control":"public, max-age=25"});
+ if(action==="catalog"&&method==="GET")return respond(await publicCatalog(db));
  if(action==="metrics"&&method==="GET"){
    const [views,readers]=await Promise.all([
     db.prepare("SELECT COALESCE(SUM(views),0) n FROM pbh_visits WHERE date>=date('now','-29 day')").first(),
@@ -162,10 +162,40 @@ export async function onRequest(context){
    if(entity==="books"&&!row.author)return failure("Book author is required");
    if(entity==="books"&&!["current","archive","draft"].includes(row.status))return failure("Choose a valid book status");
    if(entity==="authors"&&!["published","hidden"].includes(row.status))return failure("Choose a valid author status");
-   const id=cut(b.id,110)||crypto.randomUUID(),allCols=["id",...cols],vals=[id,...cols.map(k=>row[k])];
+
+   const id=cut(b.id,110)||crypto.randomUUID();
+   const previous=b.id?await db.prepare("SELECT * FROM "+table+" WHERE id=?").bind(String(b.id)).first():null;
+   const promoting=entity==="books"&&row.status==="current"&&(!previous||previous.status!=="current");
+   if(promoting){
+     await db.prepare("UPDATE pbh_books SET sort_index=sort_index+1 WHERE status='current'").run();
+     row.sort_index=0;
+     if(!row.featured_date)row.featured_date=new Date().toISOString().slice(0,10);
+   }
+   const allCols=["id",...cols],vals=[id,...cols.map(k=>row[k])];
    const query="INSERT INTO "+table+"("+allCols.join(",")+") VALUES("+allCols.map(()=>"?").join(",")+") ON CONFLICT(id) DO UPDATE SET "+cols.map(k=>k+"=excluded."+k).join(",")+(entity==="books"||entity==="authors"?",updated_at=datetime('now')":"");
    await db.prepare(query).bind(...vals).run();
-   return respond({ok:true,id});
+   if(entity==="books"){
+     // Today’s Picks has four slots. The oldest one moves to the archive automatically.
+     if(promoting)await db.prepare("UPDATE pbh_books SET status='archive' WHERE id IN (SELECT id FROM pbh_books WHERE status='current' ORDER BY sort_index ASC,updated_at DESC LIMIT -1 OFFSET 4)").run();
+     const name=row.author;
+     const existingAuthor=await db.prepare("SELECT id,books,genres,photo,feature FROM pbh_authors WHERE lower(name)=lower(?) LIMIT 1").bind(name).first();
+     if(!existingAuthor){
+       await db.prepare("INSERT INTO pbh_authors(id,name,books,photo,feature,genres,status) VALUES(?,?,?,?,?,?,'published')").bind(crypto.randomUUID(),name,JSON.stringify([row.title]),row.photo||"",row.feature||"",row.genres).run();
+     }else{
+       const bs=parseArr(existingAuthor.books).filter(v=>v!==previous?.title||previous?.author?.toLowerCase()!==name.toLowerCase());
+       if(!bs.includes(row.title))bs.push(row.title);
+       const gs=[...new Set([...parseArr(existingAuthor.genres),...parseArr(row.genres)])];
+       await db.prepare("UPDATE pbh_authors SET books=?,genres=?,photo=CASE WHEN photo='' THEN ? ELSE photo END,feature=CASE WHEN feature='' THEN ? ELSE feature END,updated_at=datetime('now') WHERE id=?").bind(JSON.stringify(bs),JSON.stringify(gs),row.photo||"",row.feature||"",existingAuthor.id).run();
+     }
+     if(previous&&previous.author?.toLowerCase()!==name.toLowerCase()){
+       const oldAuthor=await db.prepare("SELECT id,books FROM pbh_authors WHERE lower(name)=lower(?) LIMIT 1").bind(previous.author).first();
+       if(oldAuthor)await db.prepare("UPDATE pbh_authors SET books=?,updated_at=datetime('now') WHERE id=?").bind(JSON.stringify(parseArr(oldAuthor.books).filter(v=>v!==previous.title)),oldAuthor.id).run();
+     }
+   }
+   if(entity==="authors"&&previous?.name!==row.name){
+     await db.prepare("UPDATE pbh_books SET author=?,updated_at=datetime('now') WHERE lower(author)=lower(?)").bind(row.name,previous.name).run();
+   }
+   return respond({ok:true,id,published:entity==="books"?row.status!=="draft":true});
  }
  return failure("Unknown endpoint",404);
  }catch(e){console.error("Picked by Halcyon API",action,e);return failure("Unable to complete this request. Please retry.",500)}
