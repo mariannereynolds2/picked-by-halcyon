@@ -1,61 +1,60 @@
-window.PBH_CURRENT=[
+window.PBH_CURRENT = [
   {
-    "title": "Ready or Not",
-    "author": "Chautona Havig",
+    "title": "Falling Like Snow",
+    "author": "Misty Wilson",
     "genres": [
-      "Faith & Spirituality",
-      "Romance"
+      "Romance",
+      "Young Adult"
     ],
-    "image": "/images/latest/ready-or-not.jpg",
-    "photo": "/images/featured-authors/chautona-havig.jpg",
-    "feature": "/books/ready-or-not.html",
-    "featuredDate": "2026-10-09",
-    "amazon": "https://www.amazon.com/dp/B003H4QYEC",
-    "tag": "Christian Family Fiction",
-    "hook": "At twenty-two, Aggie becomes guardian to eight children. Love now asks for skills she has never had to learn."
+    "image": "/images/latest/falling-like-snow.jpg",
+    "photo": "/images/featured-authors/misty-wilson.jpg",
+    "feature": "/books/falling-like-snow.html",
+    "featuredDate": "2026-10-17",
+    "amazon": "https://www.amazon.com/dp/9781665989824",
+    "tag": "YA HOLIDAY ROMANCE",
+    "hook": "A winter festival brings Sloane closer to a new crush—and makes her look twice at the best friend who has always been there."
   },
   {
-    "title": "The Secretary",
-    "author": "Britney King",
+    "title": "Please Enjoy Your Stay",
+    "author": "Tara Goedjen",
     "genres": [
       "Mystery & Thriller"
     ],
-    "image": "/images/latest/the-secretary.jpg",
-    "photo": "/images/featured-authors/britney-king.jpg",
-    "feature": "/books/the-secretary.html",
-    "featuredDate": "2026-10-09",
-    "amazon": "https://www.amazon.com/dp/B09QP22TL8",
-    "tag": "Psychological Thriller",
-    "hook": "Gillian's dream job offers a dangerous bargain: how much can an employer ask once saying no no longer feels safe?"
+    "image": "/images/latest/please-enjoy-your-stay.jpg",
+    "photo": "/images/featured-authors/tara-goedjen.jpg",
+    "feature": "/books/please-enjoy-your-stay.html",
+    "featuredDate": "2026-10-17",
+    "amazon": "https://www.amazon.com/dp/9781668217115",
+    "tag": "GOTHIC PSYCHOLOGICAL THRILLER",
+    "hook": "A true-crime podcast revives a murder Mia thought was solved, sending her back to an Austrian castle that may have hidden the real killer."
   },
   {
-    "title": "Amethysts & Alchemy",
-    "author": "Rachel Rener",
+    "title": "The Slantwise Histories: Collected Stories",
+    "author": "Alix E. Harrow",
     "genres": [
-      "Fantasy",
-      "Romance"
+      "Fantasy"
     ],
-    "image": "/images/latest/amethysts-alchemy.jpg",
-    "photo": "/images/featured-authors/rachel-rener.jpg",
-    "feature": "/books/amethysts-alchemy.html",
-    "featuredDate": "2026-10-09",
-    "amazon": "https://www.amazon.com/dp/B0D7KKBC7T",
-    "tag": "Adult Romantic Fantasy",
-    "hook": "A pharmacist who draws magic from minerals must reconsider the rival she thought she understood."
+    "image": "/images/latest/the-slantwise-histories.jpg",
+    "photo": "/images/featured-authors/alix-e-harrow.jpg",
+    "feature": "/books/the-slantwise-histories.html",
+    "featuredDate": "2026-10-17",
+    "amazon": "https://www.amazon.com/dp/9781250345363",
+    "tag": "FANTASY SHORT STORIES",
+    "hook": "A collection of ghosts, legends and alternate histories asks who gets remembered—and who is left outside the official story."
   },
   {
-    "title": "Fat Dogs and French Estates: Part 1",
-    "author": "Beth Haslam",
+    "title": "Stellar Smoke",
+    "author": "Tanaïs",
     "genres": [
-      "Memoir & Biography",
-      "Nonfiction"
+      "Horror & Science Fiction",
+      "Literary Fiction"
     ],
-    "image": "/images/latest/fat-dogs-french-estates-part-1.jpg",
-    "photo": "/images/featured-authors/beth-haslam.jpg",
-    "feature": "/books/fat-dogs-french-estates-part-1.html",
-    "featuredDate": "2026-10-09",
-    "amazon": "https://www.amazon.com/dp/B07KVMBHYB",
-    "tag": "Humorous Travel Memoir",
-    "hook": "A search for a French estate puts a retirement dream, a marriage and two travelling dogs on the same itinerary."
+    "image": "/images/latest/stellar-smoke.jpg",
+    "photo": "/images/featured-authors/tanais.jpg",
+    "feature": "/books/stellar-smoke.html",
+    "featuredDate": "2026-10-17",
+    "amazon": "https://www.amazon.com/dp/9780593852859",
+    "tag": "LITERARY SCIENCE FICTION",
+    "hook": "Qamar returns to the island of her childhood seeking her mother—and encounters a machine that carries her mother's memories and unfinished history."
   }
 ];

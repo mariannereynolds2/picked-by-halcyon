@@ -1,5 +1,52 @@
 window.PBH_AUTHORS = [
   {
+    "name": "Chautona Havig",
+    "books": [
+      "Ready or Not"
+    ],
+    "photo": "/images/featured-authors/chautona-havig.jpg",
+    "feature": "/books/ready-or-not.html",
+    "genres": [
+      "Faith & Spirituality",
+      "Romance"
+    ]
+  },
+  {
+    "name": "Britney King",
+    "books": [
+      "The Secretary"
+    ],
+    "photo": "/images/featured-authors/britney-king.jpg",
+    "feature": "/books/the-secretary.html",
+    "genres": [
+      "Mystery & Thriller"
+    ]
+  },
+  {
+    "name": "Rachel Rener",
+    "books": [
+      "Amethysts & Alchemy"
+    ],
+    "photo": "/images/featured-authors/rachel-rener.jpg",
+    "feature": "/books/amethysts-alchemy.html",
+    "genres": [
+      "Fantasy",
+      "Romance"
+    ]
+  },
+  {
+    "name": "Beth Haslam",
+    "books": [
+      "Fat Dogs and French Estates: Part 1"
+    ],
+    "photo": "/images/featured-authors/beth-haslam.jpg",
+    "feature": "/books/fat-dogs-french-estates-part-1.html",
+    "genres": [
+      "Memoir & Biography",
+      "Nonfiction"
+    ]
+  },
+  {
     "name": "Reema Zaman",
     "books": [
       "I Am Yours: A Shared Memoir"
