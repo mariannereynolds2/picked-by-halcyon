@@ -10,7 +10,7 @@ window.PBH_CURRENT = [
     "photo": "/images/featured-authors/misty-wilson.jpg",
     "feature": "/books/falling-like-snow.html",
     "featuredDate": "2026-10-17",
-    "amazon": "https://www.amazon.com/dp/9781665989824",
+    "amazon": "https://www.amazon.com/dp/1665989823",
     "tag": "YA HOLIDAY ROMANCE",
     "hook": "A winter festival brings Sloane closer to a new crush—and makes her look twice at the best friend who has always been there."
   },
@@ -24,7 +24,7 @@ window.PBH_CURRENT = [
     "photo": "/images/featured-authors/tara-goedjen.jpg",
     "feature": "/books/please-enjoy-your-stay.html",
     "featuredDate": "2026-10-17",
-    "amazon": "https://www.amazon.com/dp/9781668217115",
+    "amazon": "https://www.amazon.com/dp/1668217112",
     "tag": "GOTHIC PSYCHOLOGICAL THRILLER",
     "hook": "A true-crime podcast revives a murder Mia thought was solved, sending her back to an Austrian castle that may have hidden the real killer."
   },
@@ -38,7 +38,7 @@ window.PBH_CURRENT = [
     "photo": "/images/featured-authors/alix-e-harrow.jpg",
     "feature": "/books/the-slantwise-histories.html",
     "featuredDate": "2026-10-17",
-    "amazon": "https://www.amazon.com/dp/9781250345363",
+    "amazon": "https://www.amazon.com/dp/1250345367",
     "tag": "FANTASY SHORT STORIES",
     "hook": "A collection of ghosts, legends and alternate histories asks who gets remembered—and who is left outside the official story."
   },
@@ -53,7 +53,7 @@ window.PBH_CURRENT = [
     "photo": "/images/featured-authors/tanais.jpg",
     "feature": "/books/stellar-smoke.html",
     "featuredDate": "2026-10-17",
-    "amazon": "https://www.amazon.com/dp/9780593852859",
+    "amazon": "https://www.amazon.com/dp/0593852850",
     "tag": "LITERARY SCIENCE FICTION",
     "hook": "Qamar returns to the island of her childhood seeking her mother—and encounters a machine that carries her mother's memories and unfinished history."
   }
