@@ -117,7 +117,7 @@ export async function onRequest(context){
    const attempts=await db.prepare("SELECT failures,updated_at FROM pbh_login_attempts WHERE key=?").bind(lockKey).first();
    if(attempts?.failures>=8&&Date.now()-attempts.updated_at<30*60*1000)return failure("Too many attempts. Try again in 30 minutes.",429);
    const username=cut(b.username,120),password=String(b.password||"");
-   const success=equal(username,env.PBH_ADMIN_USERNAME||"admin")&&equal(password,env.PBH_ADMIN_PASSWORD);
+   const success=equal(username,env.PBH_ADMIN_USERNAME||"admin2026")&&equal(password,env.PBH_ADMIN_PASSWORD);
    if(!success){
      const f=attempts&&Date.now()-attempts.updated_at<30*60*1000?attempts.failures+1:1;
      await db.prepare("INSERT INTO pbh_login_attempts(key,failures,updated_at) VALUES(?,?,?) ON CONFLICT(key) DO UPDATE SET failures=excluded.failures,updated_at=excluded.updated_at").bind(lockKey,f,Date.now()).run();
