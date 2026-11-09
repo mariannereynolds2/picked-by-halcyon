@@ -1,128 +1,152 @@
-document.addEventListener("DOMContentLoaded",()=>{
-  const menu=document.querySelector("[data-menu]");
-  const nav=document.querySelector("[data-nav]");
-  if(menu&&nav) menu.addEventListener("click",()=>nav.classList.toggle("open"));
+/* Picked by Halcyon — interface behaviour (menu, forms, filters, author kit). */
+(() => {
+  "use strict";
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  fetch("/api/pbh/metrics").then(r=>r.json()).then(data=>{
-    document.querySelectorAll("[data-metric]").forEach(el=>{
-      const key=el.dataset.metric;
-      const target=Number(data[key]||0);
-      const start=performance.now();
-      const dur=900;
-      const tick=t=>{
-        const p=Math.min(1,(t-start)/dur);
-        el.textContent=Math.floor(target*(1-Math.pow(1-p,3))).toLocaleString();
-        if(p<1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
+  const note = (form, text, kind) => {
+    const n = $(".form-note", form);
+    if (!n) return;
+    n.textContent = text;
+    n.classList.toggle("is-ok", kind === "ok");
+    n.classList.toggle("is-err", kind === "err");
+  };
+
+  const firstInvalid = form => $$("input,select,textarea", form).find(el => !el.checkValidity());
+
+  const describeInvalid = el => {
+    const label = el.labels && el.labels[0] ? el.labels[0].textContent.replace("(optional)", "").trim() : "This field";
+    if (el.type === "checkbox") return "Please tick the permission box to send your book.";
+    if (el.validity.valueMissing) return label + " is required.";
+    if (el.validity.typeMismatch && el.type === "email") return "Enter an email address like name@example.com.";
+    if (el.validity.typeMismatch && el.type === "url") return label + " needs to be a full link starting with https://";
+    if (el.validity.tooLong) return label + " is too long.";
+    return "Check " + label.toLowerCase() + ".";
+  };
+
+  async function post(url, body, isForm) {
+    const r = await fetch(url, isForm ? { method: "POST", body } : {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
     });
-  }).catch(()=>{});
+    let j = {};
+    try { j = await r.json(); } catch (_) {}
+    if (!r.ok || !j.ok) throw new Error(j.error || "The message did not go through. Check your connection and try again.");
+    return j;
+  }
 
-  document.querySelectorAll("[data-newsletter]").forEach(form=>{
-    form.addEventListener("submit",async e=>{
-      e.preventDefault();
-      const btn=form.querySelector("button");
-      const note=form.querySelector(".form-note");
-      btn.disabled=true;
-      try{
-        const email=form.querySelector('input[name="email"]').value;
-        const r=await fetch("/api/pbh/newsletter",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
-        const j=await r.json();
-        note.textContent=j.ok?"You're in. We'll send the good stuff.":(j.error||"Something went wrong.");
-        if(j.ok) form.reset();
-      }catch{note.textContent="Could not sign you up just yet."}
-      btn.disabled=false;
-    });
-  });
-
-  const submit=document.querySelector("[data-book-submit]");
-  if(submit){
-    submit.addEventListener("submit",async e=>{
-      e.preventDefault();
-      const btn=submit.querySelector("button[type=submit]");
-      const note=submit.querySelector(".form-note");
-      btn.disabled=true; note.textContent="Sending...";
-      try{
-        const r=await fetch("/api/pbh/submit-book",{method:"POST",body:new FormData(submit)});
-        const j=await r.json();
-        if(j.ok){ note.textContent="Got it. Your book is in our review pile."; submit.reset(); }
-        else note.textContent=j.error||"Please check the form and try again.";
-      }catch{note.textContent="Could not send the submission just yet."}
-      btn.disabled=false;
+  function wire(form, handler, pending) {
+    form.addEventListener("submit", async ev => {
+      ev.preventDefault();
+      const bad = firstInvalid(form);
+      if (bad) { note(form, describeInvalid(bad), "err"); bad.focus(); return; }
+      const btn = $("button[type=submit]", form);
+      const label = btn.textContent;
+      btn.disabled = true; btn.textContent = pending;
+      note(form, "", "");
+      try { await handler(form); }
+      catch (err) { note(form, err.message, "err"); }
+      finally { btn.disabled = false; btn.textContent = label; }
     });
   }
 
-  document.querySelectorAll("[data-contact]").forEach(form=>{
-    form.addEventListener("submit",async e=>{
-      e.preventDefault();
-      const btn=form.querySelector("button[type=submit]");
-      const note=form.querySelector(".form-note");
-      btn.disabled=true; note.textContent="Sending...";
-      try{
-        const payload=Object.fromEntries(new FormData(form).entries());
-        const r=await fetch("/api/pbh/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-        const j=await r.json();
-        if(j.ok){note.textContent="Message sent. We’ll get back to you.";form.reset();}
-        else note.textContent=j.error||"Please check the form and try again.";
-      }catch{note.textContent="Could not send your message just yet."}
-      btn.disabled=false;
+  document.addEventListener("DOMContentLoaded", () => {
+    /* Menu */
+    const toggle = $("[data-nav-toggle]"), nav = $("#site-nav");
+    if (toggle && nav) {
+      toggle.addEventListener("click", () => {
+        const open = nav.classList.toggle("is-open");
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && nav.classList.contains("is-open")) { nav.classList.remove("is-open"); toggle.setAttribute("aria-expanded", "false"); toggle.focus(); }
+      });
+    }
+
+    /* Newsletter */
+    $$("[data-newsletter]").forEach(form => wire(form, async f => {
+      const email = $('input[name="email"]', f).value.trim();
+      const j = await post("/api/pbh/newsletter", { email });
+      note(f, j.newSubscriber === false ? "You are already on the list. Thank you." : "You are on the list. New picks will come straight to you.", "ok");
+      f.reset();
+    }, "Signing you up…"));
+
+    /* Book submission */
+    const submit = $("[data-book-submit]");
+    if (submit) wire(submit, async f => {
+      await post("/api/pbh/submit-book", new FormData(f), true);
+      note(f, "Sent. Check your inbox for a confirmation; you can reply to it with your cover and photo. We will be in touch either way.", "ok");
+      f.reset();
+      $$("[data-count],[data-words]", f).forEach(el => el.dispatchEvent(new Event("input")));
+    }, "Sending your book…");
+
+    /* Contact */
+    $$("[data-contact]").forEach(form => wire(form, async f => {
+      const payload = Object.fromEntries(new FormData(f).entries());
+      await post("/api/pbh/contact", payload);
+      note(f, "Message sent. We will reply to the email you gave.", "ok");
+      f.reset();
+    }, "Sending…"));
+
+    /* Character and word counters */
+    $$("[data-count]").forEach(el => {
+      const max = +el.dataset.count, out = document.createElement("p");
+      out.className = "counter"; out.setAttribute("aria-live", "polite");
+      el.after(out);
+      const upd = () => { out.textContent = el.value.length + " of " + max + " characters"; out.classList.toggle("over", el.value.length >= max); };
+      el.addEventListener("input", upd); upd();
     });
+    $$("[data-words]").forEach(el => {
+      const max = +el.dataset.words, out = document.createElement("p");
+      out.className = "counter";
+      el.after(out);
+      const upd = () => { const n = (el.value.trim().match(/\S+/g) || []).length; out.textContent = n + " words (aim for " + max + " or fewer)"; out.classList.toggle("over", n > max); };
+      el.addEventListener("input", upd); upd();
+    });
+
+    /* Email template: language toggle + copy */
+    const langs = $$("[data-lang]");
+    langs.forEach(b => b.addEventListener("click", () => {
+      langs.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      $$("[data-template]").forEach(p => { p.hidden = p.dataset.template !== b.dataset.lang; });
+    }));
+    const copy = $("[data-copy-template]");
+    if (copy) copy.addEventListener("click", async () => {
+      const shown = $$("[data-template]").find(p => !p.hidden);
+      try { await navigator.clipboard.writeText(shown.textContent); }
+      catch (_) { const r = document.createRange(); r.selectNodeContents(shown); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); }
+      copy.textContent = "Copied";
+      setTimeout(() => { copy.textContent = "Copy template"; }, 2200);
+    });
+
+    /* Filters and search on grids */
+    const grid = $("[data-archive-grid]") || $("[data-author-grid]");
+    const input = $("[data-search-input]");
+    let shelf = "";
+    const apply = () => {
+      const g = $("[data-archive-grid]") || $("[data-author-grid]");
+      if (!g) return;
+      const q = (input && input.value || "").trim().toLowerCase();
+      let shown = 0;
+      Array.from(g.children).forEach(card => {
+        const okQ = !q || (card.dataset.search || card.textContent.toLowerCase()).includes(q);
+        const okS = !shelf || (card.dataset.genres || "").split("|").includes(shelf);
+        card.hidden = !(okQ && okS);
+        if (!card.hidden) shown++;
+      });
+      const count = $("[data-result-count]");
+      const noun = g.hasAttribute("data-author-grid") ? (shown === 1 ? "author" : "authors") : (shown === 1 ? "book" : "books");
+      if (count) count.textContent = shown + " " + noun + (q || shelf ? " match" : "");
+      const empty = $("[data-empty]");
+      if (empty) empty.hidden = shown > 0;
+    };
+    if (grid) {
+      if (input) input.addEventListener("input", apply);
+      $$("[data-chip]").forEach(chip => chip.addEventListener("click", () => {
+        shelf = chip.dataset.chip;
+        $$("[data-chip]").forEach(c => c.setAttribute("aria-pressed", String(c === chip)));
+        apply();
+      }));
+      window.addEventListener("pbh:catalog", apply);
+    }
   });
-
-  const spotlight=document.querySelector("[data-book-spotlight]");
-  if(spotlight){
-    const current=(window.PBH_CURRENT||[]).map(b=>({...b,link:b.feature,cta:"Open this pick →"}));
-    const archive=(window.PBH_ARCHIVE||[]).map(b=>({...b,link:b.feature||b.amazon,cta:b.feature?"Read why we picked it →":"See it on Amazon ↗"}));
-    let books=[...current,...archive].filter(b=>b.image&&b.title);
-    const cover=spotlight.querySelector("[data-spotlight-cover]");
-    const title=spotlight.querySelector("[data-spotlight-title]");
-    const author=spotlight.querySelector("[data-spotlight-author]");
-    const genre=spotlight.querySelector("[data-spotlight-genre]");
-    const line=spotlight.querySelector("[data-spotlight-line]");
-    const link=spotlight.querySelector("[data-spotlight-link]");
-    const progress=spotlight.querySelector("[data-spotlight-progress]");
-    let i=0,timer;
-
-    const genreLine=(g=[])=>{
-      const first=(g[0]||"Book").toLowerCase();
-      const lines={
-        "mystery & thriller":"For readers who want tension, secrets and one-more-chapter pacing.",
-        "romance":"For readers looking for chemistry, friction and a love story worth rooting for.",
-        "fantasy":"For readers ready to leave this world for a while.",
-        "historical fiction":"For readers who like history carried by character and consequence.",
-        "literary fiction":"For readers who want character, voice and a story that lingers.",
-        "nonfiction":"For curious readers looking for ideas, insight and something useful to take away.",
-        "memoir & biography":"For readers drawn to real lives, hard-earned perspective and lived experience.",
-        "young adult":"For readers who like big feelings, first choices and high-stakes growing up.",
-        "vampire romantasy":"For readers in the mood for vampire romantasy with gothic atmosphere.",
-        "political techno-thriller":"For readers who like conspiracies, technology and pressure that keeps climbing.",
-        "travel & adventure":"For readers planning a journey, or simply wanting to feel closer to one.",
-        "cozy mystery":"For readers who want a clever mystery without living in darkness for 300 pages."
-      };
-      return lines[first]||("A "+(g[0]||"book")+" pick worth a closer look.");
-    };
-    const show=n=>{
-      if(!books.length)return;
-      i=(n+books.length)%books.length;
-      const b=books[i];
-      spotlight.classList.add("is-changing");
-      setTimeout(()=>{
-        cover.src=b.image; cover.alt=b.title+" by "+(b.author||"");
-        title.textContent=b.title; author.textContent=b.author||"";
-        genre.textContent=(b.genres&&b.genres.length?b.genres.join(" · "):"FEATURED BOOK").toUpperCase();
-        line.textContent=b.hook||genreLine(b.genres||[]);
-        link.href=b.link||b.amazon||"#"; link.textContent=b.cta||"See it on Amazon ↗";
-        if(new URL(link.href,location.href).origin!==location.origin){link.target="_blank";link.rel="noopener"}else{link.removeAttribute("target");link.removeAttribute("rel")}
-        spotlight.classList.remove("is-changing");
-        if(progress){progress.style.animation="none";void progress.offsetWidth;progress.style.animation="spotlightProgress 5s linear forwards";}
-      },180);
-    };
-    const start=()=>{clearInterval(timer);timer=setInterval(()=>show(i+1),5000)};
-    spotlight.querySelector(".spotlight-next")?.addEventListener("click",()=>{show(i+1);start()});
-    spotlight.querySelector(".spotlight-prev")?.addEventListener("click",()=>{show(i-1);start()});
-    spotlight.addEventListener("mouseenter",()=>clearInterval(timer));
-    spotlight.addEventListener("mouseleave",start);
-    show(0);start();
-    window.addEventListener('pbh:catalog',()=>{const cur=(window.PBH_CURRENT||[]).map(b=>({...b,link:b.feature||b.amazon,cta:'Open this pick →'}));const arc=(window.PBH_ARCHIVE||[]).map(b=>({...b,link:b.feature||b.amazon,cta:b.feature?'Read why we picked it →':'See it on Amazon ↗'}));books=[...cur,...arc].filter(b=>b.image&&b.title);show(0);start()});
-  }
-});
+})();

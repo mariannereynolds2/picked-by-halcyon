@@ -11,13 +11,30 @@ const fields={
 const tables={books:"pbh_books",authors:"pbh_authors",team:"pbh_team"};
 
 const escapeHTML=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-async function sendNotice(env,subject,details,replyTo){
+async function sendMail(env,payload){
  if(!env.RESEND_API_KEY)return;
- const html="<div style='font-family:Arial,sans-serif;line-height:1.7;color:#2b211d'><h2>"+escapeHTML(subject)+"</h2>"+details.map(([label,value])=>"<p><strong>"+escapeHTML(label)+":</strong> "+escapeHTML(value).replace(/\\n/g,"<br>")+"</p>").join("")+"</div>";
- const payload={from:"Picked by Halcyon <kate@support.halcyonliterary.com>",to:["hello@halcyonliterary.com"],subject,html};
- if(/^\\S+@\\S+\\.\\S+$/.test(replyTo||""))payload.reply_to=replyTo;
  const r=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":"Bearer "+env.RESEND_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(payload)});
- if(!r.ok)throw new Error("Notification delivery failed: "+r.status);
+ if(!r.ok)throw new Error("Email delivery failed: "+r.status+" "+(await r.text().catch(()=>"")).slice(0,200));
+}
+const FROM="Picked by Halcyon <kate@support.halcyonliterary.com>",INBOX="hello@halcyonliterary.com";
+const isEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||"");
+async function sendNotice(env,subject,details,replyTo){
+ const rows=details.filter(([,v])=>text(v)).map(([label,value])=>"<tr><td style='padding:8px 14px 8px 0;vertical-align:top;color:#48595E;white-space:nowrap'><strong>"+escapeHTML(label)+"</strong></td><td style='padding:8px 0'>"+escapeHTML(value).replace(/\n/g,"<br>")+"</td></tr>").join("");
+ const html="<div style='font-family:Arial,sans-serif;line-height:1.6;color:#13252B;max-width:680px'><h2 style='font-family:Georgia,serif;font-weight:normal;color:#0A3C48'>"+escapeHTML(subject)+"</h2><table style='border-collapse:collapse;font-size:15px'>"+rows+"</table></div>";
+ const payload={from:FROM,to:[INBOX],subject,html};
+ if(isEmail(replyTo))payload.reply_to=replyTo;
+ await sendMail(env,payload);
+}
+async function sendSubmissionReceipt(env,to,name,title){
+ if(!isEmail(to))return;
+ const first=escapeHTML(String(name).split(/\s+/)[0]||"there");
+ const html="<div style='font-family:Arial,sans-serif;line-height:1.65;color:#13252B;max-width:600px'>"+
+  "<p>Hello "+first+",</p>"+
+  "<p>Thank you for sending <em>"+escapeHTML(title)+"</em> to Picked by Halcyon. It has reached our editors and we will reply either way once we have read it.</p>"+
+  "<p>If you did not include links to your cover image and author photo, simply reply to this email with them attached.</p>"+
+  "<p>As a reminder, features on Picked by Halcyon are free. We never charge authors to be featured.</p>"+
+  "<p>Warm regards,<br>The Picked by Halcyon team<br><a href='https://picked.halcyonliterary.com' style='color:#0E5A6B'>picked.halcyonliterary.com</a></p></div>";
+ await sendMail(env,{from:FROM,to:[to],reply_to:INBOX,subject:"We received "+cut(title,120)+" | Picked by Halcyon",html});
 }
 function queueNotice(context,subject,details,replyTo){
  context.waitUntil(sendNotice(context.env,subject,details,replyTo).catch(e=>console.error("Picked notification",e.message)));
@@ -86,24 +103,40 @@ export async function onRequest(context){
  }
  if(action==="submit-book"&&method==="POST"){
    const ct=req.headers.get("Content-Type")||"";
-   const b=ct.includes("multipart/form-data")?Object.fromEntries(await req.formData()):await req.json().catch(()=>({}));
-   const author=cut(b.author_name||b.author,160),email=cut(b.email,250),title=cut(b.book_title||b.title,230),genre=cut(b.genre,120),why=cut(b.why_fit,3500);
-   if(!author||!title||!why||!genre||!/^\S+@\S+\.\S+$/.test(email))return failure("Complete author, email, book, genre and why it fits.");
+   const b=ct.includes("multipart/form-data")||ct.includes("application/x-www-form-urlencoded")?Object.fromEntries(await req.formData()):await req.json().catch(()=>({}));
    if(b.honeypot||b.website_url)return respond({ok:true});
-   await db.prepare("INSERT INTO pbh_submissions(author_name,email,book_title,genre,book_link,website,why_fit,book_summary) VALUES(?,?,?,?,?,?,?,?)").bind(author,email,title,genre,safePath(b.book_link),safePath(b.website),why,cut(b.book_summary||b.summary,7000)).run();
-   queueNotice(context,"New Picked by Halcyon book submission — "+title,[["Author",author],["Email",email],["Book",title],["Genre",genre],["Book link",safePath(b.book_link)],["Website",safePath(b.website)],["Why it fits",why],["Book summary",cut(b.book_summary||b.summary,7000)]],email);
+   const author=cut(b.author_name||b.author,160),email=cut(b.email,250),title=cut(b.book_title||b.title,230),genre=cut(b.genre,120),why=cut(b.why_fit,3500);
+   if(!author||!title||!why||!genre||!isEmail(email))return failure("Please add your name, email, the book title, its shelf and why readers will love it.");
+   const link=v=>{const x=cut(v,450);return /^https?:\/\/[^\s]+$/i.test(x)?x:""};
+   const extra={
+     "Language":cut(b.language,80),
+     "One-line hook":cut(b.hook,200),
+     "Who it suits / content notes":cut(b.audience,1500),
+     "Author bio":cut(b.author_bio,2500),
+     "Cover image":link(b.cover_url),
+     "Author photo":link(b.photo_url),
+     "Other stores":cut(b.other_links,1500),
+     "Social links":cut(b.socials,600),
+     "Permission given":b.rights?"Yes":""
+   };
+   const description=cut(b.book_summary||b.summary,4000);
+   // Extra kit fields are stored with the description so no database migration is needed.
+   const stored=[description?"DESCRIPTION\n"+description:"",...Object.entries(extra).filter(([,v])=>v).map(([k,v])=>k.toUpperCase()+"\n"+v)].filter(Boolean).join("\n\n");
+   await db.prepare("INSERT INTO pbh_submissions(author_name,email,book_title,genre,book_link,website,why_fit,book_summary) VALUES(?,?,?,?,?,?,?,?)").bind(author,email,title,genre,link(b.book_link)||safePath(b.book_link),link(b.website)||safePath(b.website),why,cut(stored,7000)).run();
+   queueNotice(context,"New book submission: "+title,[["Author",author],["Email",email],["Book",title],["Shelf",genre],["Language",extra["Language"]],["One-line hook",extra["One-line hook"]],["Description",description],["Why readers will love it",why],["Who it suits / content notes",extra["Who it suits / content notes"]],["Author bio",extra["Author bio"]],["Cover image",extra["Cover image"]],["Author photo",extra["Author photo"]],["Main buy link",link(b.book_link)],["Other stores",extra["Other stores"]],["Website",link(b.website)],["Social links",extra["Social links"]],["Permission given",extra["Permission given"]]],email);
+   context.waitUntil(sendSubmissionReceipt(env,email,author,title).catch(e=>console.error("Picked receipt",e.message)));
    return respond({ok:true});
  }
  if(action==="newsletter"&&method==="POST"){
    const b=await req.json().catch(()=>({})),email=cut(b.email,250).toLowerCase();
-   if(!/^\S+@\S+\.\S+$/.test(email))return failure("Enter a valid email address.");
+   if(!isEmail(email))return failure("Enter an email address like name@example.com.");
    const r=await db.prepare("INSERT OR IGNORE INTO pbh_newsletter(email) VALUES(?)").bind(email).run();
    if((r.meta?.changes||0)>0)queueNotice(context,"New Picked by Halcyon newsletter signup",[["Email",email]],email);
    return respond({ok:true,newSubscriber:(r.meta?.changes||0)>0});
  }
  if(action==="contact"&&method==="POST"){
    const b=await req.json().catch(()=>({})),name=cut(b.name,160),email=cut(b.email,250),message=cut(b.message,6000);
-   if(!name||!message||!/^\S+@\S+\.\S+$/.test(email))return failure("Provide your name, email and message.");
+   if(!name||!message||!isEmail(email))return failure("Provide your name, email and message.");
    if(b.honeypot)return respond({ok:true});
    await db.prepare("INSERT INTO pbh_messages(name,email,subject,message) VALUES(?,?,?,?)").bind(name,email,cut(b.subject,250),message).run();
    queueNotice(context,"New Picked by Halcyon message"+(b.subject?" — "+cut(b.subject,80):""),[["Name",name],["Email",email],["Subject",cut(b.subject,250)],["Message",message]],email);
