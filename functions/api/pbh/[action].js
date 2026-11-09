@@ -18,26 +18,47 @@ async function sendMail(env,payload){
 }
 const FROM="Picked by Halcyon <kate@support.halcyonliterary.com>",INBOX="hello@halcyonliterary.com";
 const isEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||"");
-async function sendNotice(env,subject,details,replyTo){
+async function sendNotice(env,subject,details,replyTo,attachments){
  const rows=details.filter(([,v])=>text(v)).map(([label,value])=>"<tr><td style='padding:8px 14px 8px 0;vertical-align:top;color:#48595E;white-space:nowrap'><strong>"+escapeHTML(label)+"</strong></td><td style='padding:8px 0'>"+escapeHTML(value).replace(/\n/g,"<br>")+"</td></tr>").join("");
  const html="<div style='font-family:Arial,sans-serif;line-height:1.6;color:#13252B;max-width:680px'><h2 style='font-family:Georgia,serif;font-weight:normal;color:#0A3C48'>"+escapeHTML(subject)+"</h2><table style='border-collapse:collapse;font-size:15px'>"+rows+"</table></div>";
  const payload={from:FROM,to:[INBOX],subject,html};
  if(isEmail(replyTo))payload.reply_to=replyTo;
+ if(attachments&&attachments.length)payload.attachments=attachments;
  await sendMail(env,payload);
 }
-async function sendSubmissionReceipt(env,to,name,title){
+async function sendSubmissionReceipt(env,to,name,title,lang){
  if(!isEmail(to))return;
- const first=escapeHTML(String(name).split(/\s+/)[0]||"there");
- const html="<div style='font-family:Arial,sans-serif;line-height:1.65;color:#13252B;max-width:600px'>"+
-  "<p>Hello "+first+",</p>"+
-  "<p>Thank you for sending <em>"+escapeHTML(title)+"</em> to Picked by Halcyon. It has reached our editors and we will reply either way once we have read it.</p>"+
-  "<p>If you did not include links to your cover image and author photo, simply reply to this email with them attached.</p>"+
-  "<p>As a reminder, features on Picked by Halcyon are free. We never charge authors to be featured.</p>"+
-  "<p>Warm regards,<br>The Picked by Halcyon team<br><a href='https://picked.halcyonliterary.com' style='color:#0E5A6B'>picked.halcyonliterary.com</a></p></div>";
- await sendMail(env,{from:FROM,to:[to],reply_to:INBOX,subject:"We received "+cut(title,120)+" | Picked by Halcyon",html});
+ const first=escapeHTML(String(name).split(/\s+/)[0]||"");
+ const t=escapeHTML(title),fr=lang==="fr";
+ const body=fr?
+  "<p>Bonjour "+first+",</p>"+
+  "<p>Merci d'avoir proposé <em>"+t+"</em> à Picked by Halcyon. Votre proposition est bien arrivée chez nos éditeurs. Nous vous répondons dans les 7 jours, que le livre soit retenu ou non.</p>"+
+  "<p>Si vous n'avez pas joint votre couverture et votre photo, il vous suffit de répondre à cet e-mail avec les fichiers en pièce jointe.</p>"+
+  "<p>Pour rappel, la mise en avant sur Picked by Halcyon est gratuite. Nous ne vous demanderons jamais de paiement, de coordonnées bancaires ni le fichier de votre livre.</p>"+
+  "<p>Bien cordialement,<br>L'équipe Picked by Halcyon<br><a href='https://picked.halcyonliterary.com' style='color:#0E5A6B'>picked.halcyonliterary.com</a></p>"
+  :
+  "<p>Hello "+(first||"there")+",</p>"+
+  "<p>Thank you for sending <em>"+t+"</em> to Picked by Halcyon. It has reached our editors, and we will reply within 7 days whether or not it is picked.</p>"+
+  "<p>If you did not include your cover image and author photo, simply reply to this email with them attached.</p>"+
+  "<p>As a reminder, features on Picked by Halcyon are free. We will never ask you for payment, card details or your book file.</p>"+
+  "<p>Warm regards,<br>The Picked by Halcyon team<br><a href='https://picked.halcyonliterary.com' style='color:#0E5A6B'>picked.halcyonliterary.com</a></p>";
+ const subject=fr?"Nous avons bien reçu "+cut(title,120)+" | Picked by Halcyon":"We received "+cut(title,120)+" | Picked by Halcyon";
+ await sendMail(env,{from:FROM,to:[to],reply_to:INBOX,subject,html:"<div style='font-family:Arial,sans-serif;line-height:1.65;color:#13252B;max-width:600px'>"+body+"</div>"});
 }
-function queueNotice(context,subject,details,replyTo){
- context.waitUntil(sendNotice(context.env,subject,details,replyTo).catch(e=>console.error("Picked notification",e.message)));
+async function toAttachment(file,label){
+ if(!file||typeof file==="string"||!file.size)return null;
+ if(file.size>8*1024*1024)throw new Error("too-big");
+ if(!/^image\/(jpeg|png|webp)$/.test(file.type||""))throw new Error("bad-type");
+ const bytes=new Uint8Array(await file.arrayBuffer());let bin="";
+ for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+ const ext={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"}[file.type];
+ const base=String(file.name||label).replace(/\.[^.]+$/,"").replace(/[^\w.-]+/g,"-").slice(0,60)||label;
+ return {filename:label+"-"+base+"."+ext,content:btoa(bin)};
+}
+const reportSecret=env=>env.PBH_REPORT_SECRET||env.PBH_ADMIN_PASSWORD;
+async function reportKey(env,page){return (await sign(reportSecret(env),"report:"+page)).slice(0,24)}
+function queueNotice(context,subject,details,replyTo,attachments){
+ context.waitUntil(sendNotice(context.env,subject,details,replyTo,attachments).catch(e=>console.error("Picked notification",e.message)));
 }
 async function sign(secret,value){
  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
@@ -119,13 +140,35 @@ export async function onRequest(context){
      "Social links":cut(b.socials,600),
      "Permission given":b.rights?"Yes":""
    };
+   const lang=b.lang==="fr"?"fr":"en";
+   let files=[];
+   try{files=(await Promise.all([toAttachment(b.cover_file,"cover"),toAttachment(b.photo_file,"author-photo")])).filter(Boolean)}
+   catch(e){return failure(e.message==="too-big"?(lang==="fr"?"Chaque image doit faire 8 Mo maximum.":"Each image must be 8 MB or smaller."):(lang==="fr"?"Les images doivent être au format JPG, PNG ou WebP.":"Images must be JPG, PNG or WebP files."))}
+   if(files.length)extra["Files attached to this email"]=files.map(f=>f.filename).join(", ");
    const description=cut(b.book_summary||b.summary,4000);
    // Extra kit fields are stored with the description so no database migration is needed.
    const stored=[description?"DESCRIPTION\n"+description:"",...Object.entries(extra).filter(([,v])=>v).map(([k,v])=>k.toUpperCase()+"\n"+v)].filter(Boolean).join("\n\n");
    await db.prepare("INSERT INTO pbh_submissions(author_name,email,book_title,genre,book_link,website,why_fit,book_summary) VALUES(?,?,?,?,?,?,?,?)").bind(author,email,title,genre,link(b.book_link)||safePath(b.book_link),link(b.website)||safePath(b.website),why,cut(stored,7000)).run();
-   queueNotice(context,"New book submission: "+title,[["Author",author],["Email",email],["Book",title],["Shelf",genre],["Language",extra["Language"]],["One-line hook",extra["One-line hook"]],["Description",description],["Why readers will love it",why],["Who it suits / content notes",extra["Who it suits / content notes"]],["Author bio",extra["Author bio"]],["Cover image",extra["Cover image"]],["Author photo",extra["Author photo"]],["Main buy link",link(b.book_link)],["Other stores",extra["Other stores"]],["Website",link(b.website)],["Social links",extra["Social links"]],["Permission given",extra["Permission given"]]],email);
-   context.waitUntil(sendSubmissionReceipt(env,email,author,title).catch(e=>console.error("Picked receipt",e.message)));
+   queueNotice(context,"New book submission: "+title,[["Author",author],["Email",email],["Book",title],["Shelf",genre],["Language",extra["Language"]],["One-line hook",extra["One-line hook"]],["Description",description],["Why readers will love it",why],["Who it suits / content notes",extra["Who it suits / content notes"]],["Author bio",extra["Author bio"]],["Cover image",extra["Cover image"]],["Author photo",extra["Author photo"]],["Main buy link",link(b.book_link)],["Other stores",extra["Other stores"]],["Website",link(b.website)],["Social links",extra["Social links"]],["Permission given",extra["Permission given"]],["Files attached",extra["Files attached to this email"]],["Form language",lang==="fr"?"French":"English"]],email,files);
+   context.waitUntil(sendSubmissionReceipt(env,email,author,title,lang).catch(e=>console.error("Picked receipt",e.message)));
    return respond({ok:true});
+ }
+ if(action==="report"&&method==="GET"){
+   const page=cut(url.searchParams.get("page"),160),key=cut(url.searchParams.get("key"),40);
+   if(!reportSecret(env)||!/^\/books\/[\w-]+\.html$/.test(page)||!key||!equal(key,await reportKey(env,page)))return failure("This report link is not valid. Ask us for a new one.",403);
+   const [book,d30,all,days]=await Promise.all([
+     db.prepare("SELECT title,author,image,featured_date FROM pbh_books WHERE feature=? LIMIT 1").bind(page).first(),
+     db.prepare("SELECT COALESCE(SUM(views),0) n FROM pbh_visits WHERE path=? AND date>=date('now','-29 day')").bind(page).first(),
+     db.prepare("SELECT COALESCE(SUM(views),0) n,MIN(date) first FROM pbh_visits WHERE path=?").bind(page).first(),
+     db.prepare("SELECT date,SUM(views) views FROM pbh_visits WHERE path=? AND date>=date('now','-29 day') GROUP BY date ORDER BY date").bind(page).all()
+   ]);
+   return respond({ok:true,page,book:book||null,views30:d30?.n||0,total:all?.n||0,since:all?.first||null,days:days.results});
+ }
+ if(action==="report-links"&&method==="GET"){
+   if(!await authorized(req,env))return failure("Login required.",401);
+   const r=await db.prepare("SELECT title,author,feature,status FROM pbh_books WHERE feature!='' AND status!='draft' ORDER BY title").all();
+   const out=[];for(const x of r.results){if(/^\/books\/[\w-]+\.html$/.test(x.feature||""))out.push({...x,link:url.origin+"/report.html?page="+encodeURIComponent(x.feature)+"&key="+(await reportKey(env,x.feature))})}
+   return respond({ok:true,links:out});
  }
  if(action==="newsletter"&&method==="POST"){
    const b=await req.json().catch(()=>({})),email=cut(b.email,250).toLowerCase();

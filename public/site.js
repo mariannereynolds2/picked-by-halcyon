@@ -1,8 +1,44 @@
-/* Picked by Halcyon — interface behaviour (menu, forms, filters, author kit). */
+/* Picked by Halcyon — interface behaviour (menu, forms, filters, author kit, reports). */
 (() => {
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const FR = (document.documentElement.lang || "").startsWith("fr");
+  const T = FR ? {
+    tick: "Cochez la case d’autorisation pour envoyer votre livre.",
+    required: l => l + " est obligatoire.",
+    email: "Saisissez une adresse e-mail comme nom@exemple.fr.",
+    url: l => l + " doit être un lien complet commençant par https://",
+    long: l => l + " est trop long.",
+    check: l => "Vérifiez le champ « " + l + " ».",
+    net: "L’envoi n’a pas abouti. Vérifiez votre connexion et réessayez.",
+    sending: "Envoi de votre livre…",
+    sent: "C’est envoyé. Vous allez recevoir un e-mail de confirmation, et nous vous répondons sous 7 jours.",
+    msgSending: "Envoi…", msgSent: "Message envoyé. Nous répondrons à l’adresse indiquée.",
+    chars: (n, m) => n + " sur " + m + " caractères",
+    words: (n, m) => n + " mots (" + m + " maximum conseillé)",
+    big: "Ce fichier dépasse 8 Mo. Choisissez une image plus légère.",
+    type: "Choisissez une image JPG, PNG ou WebP.",
+    copied: "Copié", copy: "Copier le modèle",
+    nlIn: "Vous êtes inscrit. Les nouvelles sélections arriveront directement chez vous.", nlAlready: "Vous êtes déjà inscrit. Merci !", nlSending: "Inscription…"
+  } : {
+    tick: "Please tick the permission box to send your book.",
+    required: l => l + " is required.",
+    email: "Enter an email address like name@example.com.",
+    url: l => l + " needs to be a full link starting with https://",
+    long: l => l + " is too long.",
+    check: l => "Check " + l.toLowerCase() + ".",
+    net: "The message did not go through. Check your connection and try again.",
+    sending: "Sending your book…",
+    sent: "Sent. Check your inbox for a confirmation. We reply within 7 days either way.",
+    msgSending: "Sending…", msgSent: "Message sent. We will reply to the email you gave.",
+    chars: (n, m) => n + " of " + m + " characters",
+    words: (n, m) => n + " words (aim for " + m + " or fewer)",
+    big: "That file is larger than 8 MB. Please choose a smaller image.",
+    type: "Please choose a JPG, PNG or WebP image.",
+    copied: "Copied", copy: "Copy template",
+    nlIn: "You are on the list. New picks will come straight to you.", nlAlready: "You are already on the list. Thank you.", nlSending: "Signing you up…"
+  };
 
   const note = (form, text, kind) => {
     const n = $(".form-note", form);
@@ -12,16 +48,24 @@
     n.classList.toggle("is-err", kind === "err");
   };
 
-  const firstInvalid = form => $$("input,select,textarea", form).find(el => !el.checkValidity());
+  const fileProblem = el => {
+    const f = el.files && el.files[0];
+    if (!f) return "";
+    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return T.type;
+    if (f.size > 8 * 1024 * 1024) return T.big;
+    return "";
+  };
+  const firstInvalid = form => $$("input,select,textarea", form).find(el => !el.checkValidity() || (el.type === "file" && fileProblem(el)));
 
   const describeInvalid = el => {
-    const label = el.labels && el.labels[0] ? el.labels[0].textContent.replace("(optional)", "").trim() : "This field";
-    if (el.type === "checkbox") return "Please tick the permission box to send your book.";
-    if (el.validity.valueMissing) return label + " is required.";
-    if (el.validity.typeMismatch && el.type === "email") return "Enter an email address like name@example.com.";
-    if (el.validity.typeMismatch && el.type === "url") return label + " needs to be a full link starting with https://";
-    if (el.validity.tooLong) return label + " is too long.";
-    return "Check " + label.toLowerCase() + ".";
+    const label = el.labels && el.labels[0] ? el.labels[0].textContent.replace(/\((optional|facultatif)\)/, "").trim() : "This field";
+    if (el.type === "file") return fileProblem(el);
+    if (el.type === "checkbox") return T.tick;
+    if (el.validity.valueMissing) return T.required(label);
+    if (el.validity.typeMismatch && el.type === "email") return T.email;
+    if (el.validity.typeMismatch && el.type === "url") return T.url(label);
+    if (el.validity.tooLong) return T.long(label);
+    return T.check(label);
   };
 
   async function post(url, body, isForm) {
@@ -30,7 +74,7 @@
     });
     let j = {};
     try { j = await r.json(); } catch (_) {}
-    if (!r.ok || !j.ok) throw new Error(j.error || "The message did not go through. Check your connection and try again.");
+    if (!r.ok || !j.ok) throw new Error(j.error || T.net);
     return j;
   }
 
@@ -49,6 +93,8 @@
     });
   }
 
+  const fmtN = n => Number(n || 0).toLocaleString(FR ? "fr-FR" : "en-US");
+
   document.addEventListener("DOMContentLoaded", () => {
     /* Menu */
     const toggle = $("[data-nav-toggle]"), nav = $("#site-nav");
@@ -66,57 +112,69 @@
     $$("[data-newsletter]").forEach(form => wire(form, async f => {
       const email = $('input[name="email"]', f).value.trim();
       const j = await post("/api/pbh/newsletter", { email });
-      note(f, j.newSubscriber === false ? "You are already on the list. Thank you." : "You are on the list. New picks will come straight to you.", "ok");
+      note(f, j.newSubscriber === false ? T.nlAlready : T.nlIn, "ok");
       f.reset();
-    }, "Signing you up…"));
+    }, T.nlSending));
 
     /* Book submission */
     const submit = $("[data-book-submit]");
     if (submit) wire(submit, async f => {
       await post("/api/pbh/submit-book", new FormData(f), true);
-      note(f, "Sent. Check your inbox for a confirmation; you can reply to it with your cover and photo. We will be in touch either way.", "ok");
+      note(f, T.sent, "ok");
       f.reset();
-      $$("[data-count],[data-words]", f).forEach(el => el.dispatchEvent(new Event("input")));
-    }, "Sending your book…");
+      $$("[data-count],[data-words],input[type=file]", f).forEach(el => el.dispatchEvent(new Event(el.type === "file" ? "change" : "input")));
+    }, T.sending);
 
-    /* Contact */
+    /* Contact and testimonial forms */
     $$("[data-contact]").forEach(form => wire(form, async f => {
       const payload = Object.fromEntries(new FormData(f).entries());
       await post("/api/pbh/contact", payload);
-      note(f, "Message sent. We will reply to the email you gave.", "ok");
+      note(f, form.dataset.okText || T.msgSent, "ok");
       f.reset();
-    }, "Sending…"));
+    }, T.msgSending));
+
+    /* File pickers: show the chosen file */
+    $$("input[type=file]").forEach(el => {
+      const out = document.createElement("p");
+      out.className = "counter"; out.setAttribute("aria-live", "polite");
+      el.after(out);
+      el.addEventListener("change", () => {
+        const f = el.files && el.files[0], p = fileProblem(el);
+        out.classList.toggle("over", !!p);
+        out.textContent = !f ? "" : p || (f.name + " · " + (f.size / 1048576).toFixed(1) + " MB");
+      });
+    });
 
     /* Character and word counters */
     $$("[data-count]").forEach(el => {
       const max = +el.dataset.count, out = document.createElement("p");
       out.className = "counter"; out.setAttribute("aria-live", "polite");
       el.after(out);
-      const upd = () => { out.textContent = el.value.length + " of " + max + " characters"; out.classList.toggle("over", el.value.length >= max); };
+      const upd = () => { out.textContent = T.chars(el.value.length, max); out.classList.toggle("over", el.value.length >= max); };
       el.addEventListener("input", upd); upd();
     });
     $$("[data-words]").forEach(el => {
       const max = +el.dataset.words, out = document.createElement("p");
       out.className = "counter";
       el.after(out);
-      const upd = () => { const n = (el.value.trim().match(/\S+/g) || []).length; out.textContent = n + " words (aim for " + max + " or fewer)"; out.classList.toggle("over", n > max); };
+      const upd = () => { const n = (el.value.trim().match(/\S+/g) || []).length; out.textContent = T.words(n, max); out.classList.toggle("over", n > max); };
       el.addEventListener("input", upd); upd();
     });
 
-    /* Email template: language toggle + copy */
+    /* Email template: language toggle + copy (also used for badge code) */
     const langs = $$("[data-lang]");
     langs.forEach(b => b.addEventListener("click", () => {
       langs.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
       $$("[data-template]").forEach(p => { p.hidden = p.dataset.template !== b.dataset.lang; });
     }));
-    const copy = $("[data-copy-template]");
-    if (copy) copy.addEventListener("click", async () => {
-      const shown = $$("[data-template]").find(p => !p.hidden);
-      try { await navigator.clipboard.writeText(shown.textContent); }
-      catch (_) { const r = document.createRange(); r.selectNodeContents(shown); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); }
-      copy.textContent = "Copied";
-      setTimeout(() => { copy.textContent = "Copy template"; }, 2200);
-    });
+    $$("[data-copy-template],[data-copy]").forEach(btn => btn.addEventListener("click", async () => {
+      const src = btn.dataset.copy ? $(btn.dataset.copy) : $$("[data-template]").find(p => !p.hidden);
+      const text = src.value !== undefined && src.tagName !== "PRE" ? src.value : src.textContent;
+      try { await navigator.clipboard.writeText(text); }
+      catch (_) { const r = document.createRange(); r.selectNodeContents(src); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); }
+      const old = btn.textContent; btn.textContent = T.copied;
+      setTimeout(() => { btn.textContent = old; }, 2200);
+    }));
 
     /* Filters and search on grids */
     const grid = $("[data-archive-grid]") || $("[data-author-grid]");
@@ -147,6 +205,40 @@
         apply();
       }));
       window.addEventListener("pbh:catalog", apply);
+    }
+
+    /* Author's private view report */
+    const rep = $("[data-report]");
+    if (rep) {
+      const q = new URLSearchParams(location.search);
+      const show = id => $$("[data-report-state]").forEach(el => { el.hidden = el.dataset.reportState !== id; });
+      if (!q.get("page") || !q.get("key")) { show("invalid"); }
+      else fetch("/api/pbh/report?page=" + encodeURIComponent(q.get("page")) + "&key=" + encodeURIComponent(q.get("key")), { cache: "no-store" })
+        .then(r => r.json()).then(d => {
+          if (!d.ok) return show("invalid");
+          const b = d.book || {};
+          $("[data-r-title]").textContent = b.title || q.get("page");
+          $("[data-r-author]").textContent = b.author ? "by " + b.author : "";
+          if (b.image) { const i = $("[data-r-cover]"); i.src = b.image; i.hidden = false; }
+          $("[data-r-30]").textContent = fmtN(d.views30);
+          $("[data-r-total]").textContent = fmtN(d.total);
+          $("[data-r-since]").textContent = d.since ? new Date(d.since + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" }) : "not yet";
+          const link = $("[data-r-link]"); link.href = d.page; link.textContent = location.origin + d.page;
+          const days = d.days || [], max = Math.max(1, ...days.map(x => x.views));
+          $("[data-r-bars]").innerHTML = days.length ? days.map(x => '<span title="' + x.date + ': ' + x.views + ' views" style="height:' + Math.max(4, Math.round(x.views / max * 100)) + '%"></span>').join("") : "<p>No visits recorded in the last 30 days yet.</p>";
+          show("ok");
+        }).catch(() => show("invalid"));
+    }
+
+    /* Admin helper: list every author's private report link */
+    const rl = $("[data-report-links]");
+    if (rl) {
+      fetch("/api/pbh/report-links", { credentials: "same-origin", cache: "no-store" }).then(r => r.json()).then(d => {
+        if (!d.ok) { rl.innerHTML = '<p>Sign in to the <a href="/admin/">website manager</a> first, then reload this page.</p>'; return; }
+        const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        rl.innerHTML = '<ul class="kit-list">' + d.links.map((x, i) => '<li><span></span><div><strong>' + esc(x.title) + '</strong><span>' + esc(x.author) + '</span><div class="button-row" style="margin-top:8px"><input class="sr-only" id="rl' + i + '" value="' + esc(x.link) + '" readonly><button class="btn btn-quiet" type="button" data-copy="#rl' + i + '">Copy link</button><a class="text-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Open</a></div></div></li>').join("") + "</ul>";
+        $$("[data-copy]", rl).forEach(btn => btn.addEventListener("click", async () => { const v = $(btn.dataset.copy).value; try { await navigator.clipboard.writeText(v); } catch (_) {} btn.textContent = "Copied"; setTimeout(() => btn.textContent = "Copy link", 2000); }));
+      }).catch(() => { rl.textContent = "Could not load the links. Reload the page to try again."; });
     }
   });
 })();
