@@ -535,6 +535,19 @@ a.author-card:hover h3{color:var(--kf)}
   .flow-item{width:160px}
 }
 
+
+.hero-flow-wrap{min-width:0}
+.flow-caption{text-align:center;max-width:46ch;margin:4px auto 0;min-height:118px}
+.flow-caption.is-in{animation:capIn .6s ease}
+@keyframes capIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.flow-tag{display:inline-block;font-size:.75rem;font-weight:700;color:#fff;background:rgba(255,255,255,.14);padding:3px 10px;border-radius:999px;margin-bottom:10px}
+.flow-title{font-family:var(--serif);font-size:1.4rem;line-height:1.25;margin:0 0 6px;color:#fff}
+.flow-title a{color:#fff;text-decoration:none}
+.flow-title a:hover{text-decoration:underline;text-underline-offset:4px}
+.flow-by{font-style:italic;font-size:1.05rem;color:#9FC0C7;white-space:nowrap}
+.flow-hook{font-family:var(--serif);font-size:1rem;line-height:1.5;color:#C9DEE2;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media (max-width:860px){.hero-flow-wrap{order:-1}.hero-flow{order:0}.flow-caption{min-height:128px;margin-bottom:8px}.flow-title{font-size:1.25rem}}
+
 /* ---------- Footer ---------- */
 .site-footer{background:var(--ink);color:#B6C6C9;padding:56px 0 28px;font-size:.9375rem}
 .site-footer .top{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:32px;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,.12)}

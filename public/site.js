@@ -210,7 +210,7 @@
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     /* Hero cover flow */
     $$("[data-hero-flow]").forEach(root => {
-      const items = $$("[data-flow-item]", root), cap = $("[data-flow-caption]", root), N = items.length;
+      const items = $$("[data-flow-item]", root), N = items.length;
       if (!N) return;
       let i = 0, timer = null, hold = false;
       const place = () => {
@@ -222,7 +222,15 @@
           if (center) el.removeAttribute("aria-hidden"); else el.setAttribute("aria-hidden", "true");
           if (Math.abs(d) <= 3) { const img = el.querySelector("img"); if (img.loading === "lazy") img.loading = "eager"; }
         });
-        if (cap) cap.textContent = items[i].getAttribute("aria-label");
+        const wrap = root.closest(".hero-flow-wrap"), it = items[i];
+        if (wrap) {
+          const set = (sel, v) => { const el = wrap.querySelector(sel); if (el) el.textContent = v || ""; };
+          const c = wrap.querySelector("[data-flow-caption]");
+          if (c) { c.classList.remove("is-in"); void c.offsetWidth; c.classList.add("is-in"); }
+          set("[data-fc-tag]", it.dataset.tag); set("[data-fc-title]", it.dataset.title); set("[data-fc-author]", it.dataset.author); set("[data-fc-hook]", it.dataset.hook);
+          const l = wrap.querySelector("[data-fc-link]"); if (l) l.href = it.getAttribute("href");
+          const tg = wrap.querySelector("[data-fc-tag]"); if (tg) tg.hidden = !it.dataset.tag;
+        }
       };
       const go = n => { i = (n + N) % N; place(); };
       const play = () => { clearInterval(timer); if (reduce || hold || document.hidden) return; timer = setInterval(() => go(i + 1), 3200); };
