@@ -65,6 +65,27 @@
       }).join("");
     }
 
+    const promoBooks = archive.filter(b => safe(b.feature)).concat(current.filter(b => safe(b.feature)));
+    if (promoBooks.length) $$("[data-promo]").forEach(root => {
+      const track = root.querySelector("[data-promo-track]");
+      const sig = promoBooks.map(b => b.title).join("|");
+      const have = Array.from(track.querySelectorAll("h3")).map(h => h.textContent).join("|");
+      if (sig === have) return;
+      let colors = {}; try { colors = JSON.parse(root.dataset.colors || "{}"); } catch (_) {}
+      const fallback = ["#1E4F5C", "#5A2E3A", "#2F4A2B", "#4A3A1E", "#2E3A5C", "#5C3A1E"];
+      const n = promoBooks.length;
+      track.innerHTML = promoBooks.map((b, i) => {
+        const h = link(b), col = colors[b.image] || fallback[i % fallback.length], on = i === 0, ti = on ? 0 : -1;
+        const tag = sentence(b.tag || ""), tags = [tag].concat((b.genres || []).filter(g => !tag.toLowerCase().includes(g.toLowerCase())).slice(0, 2)).filter(Boolean);
+        return '<li class="promo-slide' + (on ? " is-active" : "") + '" style="--band:' + esc(col) + '" data-slide aria-roledescription="slide" aria-label="' + (i + 1) + ' of ' + n + '"' + (on ? "" : ' aria-hidden="true"') + '>' +
+          '<a class="promo-cover" href="' + h + '" tabindex="' + ti + '" aria-label="' + esc(b.title) + ' by ' + esc(b.author) + '"><img src="' + safe(b.image) + '" alt="" width="300" height="450"' + (i < 2 ? "" : ' loading="lazy"') + '></a>' +
+          '<div class="promo-band"><div class="promo-copy"><ul class="vibes" aria-label="Vibes">' + tags.map(t => "<li>" + esc(t) + "</li>").join("") + '</ul>' +
+          '<h3><a href="' + h + '" tabindex="' + ti + '">' + esc(b.title) + '</a></h3><p class="promo-by">by ' + esc(b.author) + '</p><p class="promo-hook">' + esc(b.hook || "") + '</p></div>' +
+          '<a class="btn btn-light promo-cta" href="' + h + '" tabindex="' + ti + '">Why we picked it</a></div></li>';
+      }).join("");
+      window.dispatchEvent(new Event("pbh:promo"));
+    });
+
     const team = $("[data-team]");
     if (team && (d.team || []).length) team.innerHTML = d.team.map(x => '<article class="team-card">' + (safe(x.photo) ? '<img src="' + safe(x.photo) + '" alt="Portrait of ' + esc(x.name) + '" loading="lazy" width="480" height="600">' : "") + '<h3>' + esc(x.name) + '</h3><p>' + esc(x.bio || x.role) + '</p></article>').join("");
 

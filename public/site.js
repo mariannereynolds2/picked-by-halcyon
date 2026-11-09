@@ -207,6 +207,50 @@
       window.addEventListener("pbh:catalog", apply);
     }
 
+    /* Rotating book banner */
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const DUR = 6000;
+    const initPromo = root => {
+      if (root._promo) root._promo.stop();
+      const slides = $$("[data-slide]", root);
+      if (!slides.length) return;
+      const count = $("[data-promo-count]", root), bar = $("[data-promo-bar]", root), pauseBtn = $("[data-promo-pause]", root);
+      let i = Math.max(0, slides.findIndex(s => s.classList.contains("is-active"))), timer = null, userPaused = reduce, hover = false;
+      const icon = paused => paused ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>';
+      const runBar = on => { if (!bar) return; bar.classList.remove("run"); void bar.offsetWidth; if (on) { bar.style.setProperty("--dur", DUR + "ms"); bar.classList.add("run"); } };
+      const show = n => {
+        i = (n + slides.length) % slides.length;
+        slides.forEach((s, k) => {
+          const on = k === i;
+          s.classList.toggle("is-active", on);
+          if (on) s.removeAttribute("aria-hidden"); else s.setAttribute("aria-hidden", "true");
+          $$("a", s).forEach(a => a.tabIndex = on ? 0 : -1);
+          if (on) $$("img[loading=lazy]", slides[(k + 1) % slides.length]).forEach(img => img.loading = "eager");
+        });
+        if (count) count.textContent = (i + 1) + " of " + slides.length;
+      };
+      const stop = () => { clearInterval(timer); timer = null; runBar(false); };
+      const play = () => { stop(); if (userPaused || hover || document.hidden) return; runBar(true); timer = setInterval(() => { show(i + 1); runBar(true); }, DUR); };
+      const setPaused = p => { userPaused = p; if (pauseBtn) { pauseBtn.innerHTML = icon(p); pauseBtn.setAttribute("aria-label", p ? "Play the rotation" : "Pause the rotation"); } play(); };
+      $("[data-promo-next]", root)?.addEventListener("click", () => { show(i + 1); play(); });
+      $("[data-promo-prev]", root)?.addEventListener("click", () => { show(i - 1); play(); });
+      pauseBtn?.addEventListener("click", () => setPaused(!userPaused));
+      const track = $("[data-promo-track]", root);
+      track.addEventListener("mouseenter", () => { hover = true; play(); });
+      track.addEventListener("mouseleave", () => { hover = false; play(); });
+      root.addEventListener("focusin", () => { hover = true; play(); });
+      root.addEventListener("focusout", e => { if (!root.contains(e.relatedTarget)) { hover = false; play(); } });
+      root.addEventListener("keydown", e => { if (e.key === "ArrowRight") { show(i + 1); play(); } if (e.key === "ArrowLeft") { show(i - 1); play(); } });
+      let x0 = null;
+      track.addEventListener("pointerdown", e => { x0 = e.clientX; });
+      track.addEventListener("pointerup", e => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) { show(i + (dx < 0 ? 1 : -1)); play(); } });
+      document.addEventListener("visibilitychange", play);
+      root._promo = { stop };
+      show(i); setPaused(userPaused);
+    };
+    $$("[data-promo]").forEach(initPromo);
+    window.addEventListener("pbh:promo", () => $$("[data-promo]").forEach(initPromo));
+
     /* Author's private view report */
     const rep = $("[data-report]");
     if (rep) {
