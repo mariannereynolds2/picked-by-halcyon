@@ -78,7 +78,7 @@
         return '<li class="promo-slide' + (on ? " is-active" : "") + '" style="--band:' + esc(col) + '" data-slide aria-roledescription="slide" aria-label="' + (i + 1) + ' of ' + n + '"' + (on ? "" : ' aria-hidden="true"') + '>' +
           '<a class="promo-cover" href="' + h + '" tabindex="' + ti + '" aria-label="' + esc(b.title) + ' by ' + esc(b.author) + '"><img src="' + safe(b.image) + '" alt="" width="300" height="450"' + (i < 2 ? "" : ' loading="lazy"') + '></a>' +
           '<div class="promo-band"><div class="promo-copy"><ul class="vibes" aria-label="Vibes">' + tags.map(t => "<li>" + esc(t) + "</li>").join("") + '</ul>' +
-          '<h3><a href="' + h + '" tabindex="' + ti + '">' + esc(b.title) + '</a></h3><p class="promo-by">by ' + esc(b.author) + '</p></div>' +
+          '<h3><a href="' + h + '" tabindex="' + ti + '">' + esc(b.title) + '</a></h3><p class="promo-by">by ' + esc(b.author) + '</p><p class="promo-hook">' + esc(b.hook || "") + '</p></div>' +
           '<a class="btn btn-light promo-cta" href="' + h + '" tabindex="' + ti + '">Why we picked it</a></div></li>';
       }).join("");
       window.dispatchEvent(new Event("pbh:promo"));

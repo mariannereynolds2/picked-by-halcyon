@@ -492,7 +492,7 @@ a.author-card:hover h3{color:var(--kf)}
 .promo h3 a{color:#fff;text-decoration:none}
 .promo h3 a:hover{text-decoration:underline;text-underline-offset:4px}
 .promo-by{font-family:var(--serif);font-style:italic;color:rgba(255,255,255,.82);margin:4px 0 8px}
-.promo-hook{font-family:var(--serif);font-size:1.05rem;line-height:1.45;color:rgba(255,255,255,.94);margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.promo-hook{font-family:var(--serif);font-size:1.05rem;line-height:1.45;color:rgba(255,255,255,.9);margin:0;max-width:52ch;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .promo-cta{flex:none;position:relative;z-index:1}
 .promo-foot{display:flex;align-items:center;gap:16px;margin-top:6px}
 .promo-count{margin:0;font-size:.8125rem;font-weight:700;color:var(--ink-2);min-width:64px}
@@ -509,7 +509,7 @@ a.author-card:hover h3{color:var(--kf)}
   .vibes li:nth-child(n+2){display:none}
   .promo h3{font-size:1.1rem}
   .promo-by{font-size:.875rem;margin:2px 0 4px}
-  .promo-hook{font-size:.875rem;line-height:1.35}
+  .promo-hook{font-size:.8125rem;line-height:1.35;-webkit-line-clamp:2}
   .promo-btn{width:38px;height:38px}
 }
 
