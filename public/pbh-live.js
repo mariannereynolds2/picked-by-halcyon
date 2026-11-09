@@ -27,7 +27,6 @@
       '<div><p class="pick-genre">' + esc(tag) + '</p><h3><a href="' + h + '">' + esc(b.title) + '</a></h3><p class="by">by ' + esc(b.author) + '</p>' +
       '<p class="hook">' + esc(b.hook || "") + '</p><a class="text-link" href="' + h + '" aria-label="Why we picked ' + esc(b.title) + '">Why we picked it</a></div></article>';
   };
-  const heroBook = b => '<a class="hero-book" href="' + link(b) + '"><img src="' + safe(b.image) + '" alt="' + esc(b.title) + ' by ' + esc(b.author) + '" width="300" height="450"></a>';
   const initials = n => String(n).split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join("").toUpperCase();
 
   function paint(d) {
@@ -39,7 +38,6 @@
 
     if (current.length) {
       $$("[data-current-picks]").forEach(el => { el.innerHTML = current.map(pickRow).join(""); });
-      $$("[data-hero-books]").forEach(el => { el.innerHTML = current.slice(0, 4).map(heroBook).join(""); });
       $$("[data-current-authors]").forEach(el => {
         el.innerHTML = current.map(b => { const p = safe(b.photo) || safe(photoFor(b.author)); return '<a href="' + link(b) + '#author">' + (p ? '<img src="' + p + '" alt="" loading="lazy" width="240" height="240">' : "") + '<h3>' + esc(b.author) + '</h3><p>' + esc(b.title) + '</p></a>'; }).join("");
       });
@@ -76,11 +74,11 @@
       const n = promoBooks.length;
       track.innerHTML = promoBooks.map((b, i) => {
         const h = link(b), col = colors[b.image] || fallback[i % fallback.length], on = i === 0, ti = on ? 0 : -1;
-        const tag = sentence(b.tag || ""), tags = [tag].concat((b.genres || []).filter(g => !tag.toLowerCase().includes(g.toLowerCase())).slice(0, 2)).filter(Boolean);
+        const tag = sentence(b.tag || ""), tags = [tag].concat((b.genres || []).filter(g => !tag.toLowerCase().includes(g.toLowerCase())).slice(0, 1)).filter(Boolean);
         return '<li class="promo-slide' + (on ? " is-active" : "") + '" style="--band:' + esc(col) + '" data-slide aria-roledescription="slide" aria-label="' + (i + 1) + ' of ' + n + '"' + (on ? "" : ' aria-hidden="true"') + '>' +
           '<a class="promo-cover" href="' + h + '" tabindex="' + ti + '" aria-label="' + esc(b.title) + ' by ' + esc(b.author) + '"><img src="' + safe(b.image) + '" alt="" width="300" height="450"' + (i < 2 ? "" : ' loading="lazy"') + '></a>' +
           '<div class="promo-band"><div class="promo-copy"><ul class="vibes" aria-label="Vibes">' + tags.map(t => "<li>" + esc(t) + "</li>").join("") + '</ul>' +
-          '<h3><a href="' + h + '" tabindex="' + ti + '">' + esc(b.title) + '</a></h3><p class="promo-by">by ' + esc(b.author) + '</p><p class="promo-hook">' + esc(b.hook || "") + '</p></div>' +
+          '<h3><a href="' + h + '" tabindex="' + ti + '">' + esc(b.title) + '</a></h3><p class="promo-by">by ' + esc(b.author) + '</p></div>' +
           '<a class="btn btn-light promo-cta" href="' + h + '" tabindex="' + ti + '">Why we picked it</a></div></li>';
       }).join("");
       window.dispatchEvent(new Event("pbh:promo"));

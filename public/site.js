@@ -207,8 +207,38 @@
       window.addEventListener("pbh:catalog", apply);
     }
 
-    /* Rotating book banner */
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* Hero cover flow */
+    $$("[data-hero-flow]").forEach(root => {
+      const items = $$("[data-flow-item]", root), cap = $("[data-flow-caption]", root), N = items.length;
+      if (!N) return;
+      let i = 0, timer = null, hold = false;
+      const place = () => {
+        items.forEach((el, k) => {
+          let d = (k - i) % N; if (d > N / 2) d -= N; if (d < -N / 2) d += N;
+          if (Math.abs(d) <= 2) el.dataset.pos = d; else delete el.dataset.pos;
+          const center = d === 0;
+          el.tabIndex = center ? 0 : -1;
+          if (center) el.removeAttribute("aria-hidden"); else el.setAttribute("aria-hidden", "true");
+          if (Math.abs(d) <= 3) { const img = el.querySelector("img"); if (img.loading === "lazy") img.loading = "eager"; }
+        });
+        if (cap) cap.textContent = items[i].getAttribute("aria-label");
+      };
+      const go = n => { i = (n + N) % N; place(); };
+      const play = () => { clearInterval(timer); if (reduce || hold || document.hidden) return; timer = setInterval(() => go(i + 1), 3200); };
+      items.forEach((el, k) => el.addEventListener("click", ev => { if (el.dataset.pos !== "0") { ev.preventDefault(); go(k); play(); } }));
+      root.addEventListener("mouseenter", () => { hold = true; play(); });
+      root.addEventListener("mouseleave", () => { hold = false; play(); });
+      root.addEventListener("focusin", () => { hold = true; play(); });
+      root.addEventListener("focusout", () => { hold = false; play(); });
+      let x0 = null;
+      root.addEventListener("pointerdown", e => { x0 = e.clientX; });
+      root.addEventListener("pointerup", e => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) { go(i + (dx < 0 ? 1 : -1)); play(); } });
+      document.addEventListener("visibilitychange", play);
+      place(); play();
+    });
+
+    /* Rotating book banner */
     const DUR = 6000;
     const initPromo = root => {
       if (root._promo) root._promo.stop();
