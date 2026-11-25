@@ -4,8 +4,8 @@ const failure=(message,status=400)=>respond({ok:false,error:message},status);
 const parseArr=v=>{try{return Array.isArray(v)?v:JSON.parse(v||"[]")}catch{return []}};
 const safePath=v=>{const s=cut(v,450);return !s||s.startsWith("/")&&!s.startsWith("//")||/^https:\/\//i.test(s)?s:""};
 const fields={
- books:["title","author","genres","image","amazon","feature","photo","tag","hook","featured_date","status","sort_index"],
- authors:["name","books","photo","feature","genres","status"],
+ books:["title","author","genres","image","amazon","feature","photo","tag","hook","description","featured_date","status","sort_index"],
+ authors:["name","bio","books","photo","feature","genres","status"],
  team:["name","role","bio","photo","sort_index","visible"]
 };
 const tables={books:"pbh_books",authors:"pbh_authors",team:"pbh_team"};
@@ -185,6 +185,18 @@ export async function onRequest(context){
    queueNotice(context,"New Picked by Halcyon message"+(b.subject?" — "+cut(b.subject,80):""),[["Name",name],["Email",email],["Subject",cut(b.subject,250)],["Message",message]],email);
    return respond({ok:true});
  }
+ if(action==="upload-image"&&method==="POST"){
+   if(!await authorized(req,env))return failure("Login required.",401);
+   if(!env.PBH_IMAGES)return failure("Image storage is not configured yet. Create an R2 bucket and bind it as PBH_IMAGES.",503);
+   const form=await req.formData(),file=form.get("image");
+   if(!file||typeof file==="string"||!file.size)return failure("Choose an image file first.");
+   if(file.size>8*1024*1024)return failure("Each image must be 8 MB or smaller.");
+   const types={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"};
+   if(!types[file.type])return failure("Images must be JPG, PNG or WebP.");
+   const key="editorial-"+crypto.randomUUID()+"."+types[file.type];
+   await env.PBH_IMAGES.put(key,file.stream(),{httpMetadata:{contentType:file.type,cacheControl:"public, max-age=31536000, immutable"}});
+   return respond({ok:true,url:"/media/"+key});
+ }
  if(action==="login"&&method==="POST"){
    if(!env.PBH_ADMIN_PASSWORD)return failure("Admin login is not configured. Add PBH_ADMIN_PASSWORD as a Cloudflare Pages secret.",503);
    const b=await req.json().catch(()=>({}));
@@ -231,7 +243,7 @@ export async function onRequest(context){
      else if(col==="sort_index")v=Math.max(0,parseInt(v,10)||0);
      else if(col==="visible")v=v===false||v===0||v==="0"?0:1;
      else if(["amazon","feature","image","photo"].includes(col))v=safePath(v);
-     else v=cut(v,col==="hook"||col==="bio"?3000:col==="name"||col==="title"?240:500);
+     else v=cut(v,["hook","bio","description"].includes(col)?6000:col==="name"||col==="title"?240:500);
      row[col]=v;
    }
    if(!row[entity==="books"?"title":"name"])return failure("A title or name is required");
