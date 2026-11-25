@@ -86,7 +86,7 @@
       }).join("");
     }
 
-    const promoBooks = archive.filter(b => safe(b.feature)).concat(current.filter(b => safe(b.feature)));
+    const promoBooks = current.filter(b => safe(b.feature));
     if (promoBooks.length) $$("[data-promo]").forEach(root => {
       const track = root.querySelector("[data-promo-track]");
       const sig = promoBooks.map(b => b.title).join("|");
