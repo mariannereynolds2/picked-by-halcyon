@@ -97,6 +97,13 @@
         const st = $("[data-book-status] .pill");
         if (st) { const cur = sel.status === "current"; st.textContent = cur ? "Current pick" : "From the archive"; st.classList.toggle("current", cur); }
         const dt = $("[data-feature-date]"); if (dt && sel.featured_date && fmtDate(sel.featured_date)) { dt.dateTime = sel.featured_date; dt.textContent = fmtDate(sel.featured_date); }
+        const description = $("[data-book-description]");
+        if (description && sel.description) description.innerHTML = String(sel.description).split("\n\n").map(p => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
+        const author = authors.find(a => a.name.toLowerCase() === String(sel.author || "").toLowerCase());
+        const authorPhoto = $("[data-author-photo]") || $(".author-bio img");
+        if (authorPhoto && author && safe(author.photo)) { authorPhoto.src = author.photo; authorPhoto.alt = "Portrait of " + author.name; }
+        const authorBio = $(".author-bio .bio");
+        if (authorBio && author && author.bio) authorBio.innerHTML = "<p>" + esc(author.bio).replace(/\n/g, "<br>") + "</p>";
       }
     }
     window.dispatchEvent(new Event("pbh:catalog"));
