@@ -17,19 +17,42 @@
   const coverCard = b => {
     const h = link(b), feat = !!safe(b.feature);
     return '<a class="cover-card" href="' + h + '"' + ext(h) + ' data-genres="' + esc((b.genres || []).join("|")) + '" data-search="' + esc((b.title + " " + b.author).toLowerCase()) + '">' +
-      '<span class="cover"><img src="' + safe(b.image) + '" alt="" loading="lazy" width="320" height="480"></span>' +
+      '<span class="cover" style="position:relative">' + image(b.image, "Cover of " + b.title, b.title, "cover", 'width="320" height="480"') + '</span>' +
       '<h3>' + esc(b.title) + '</h3><p class="by">' + esc(b.author) + '</p>' +
       (feat ? '<p class="where read">Read our feature</p>' : '<p class="where">View on Amazon<span class="sr-only"> (opens in a new tab)</span></p>') + '</a>';
   };
   const pickRow = b => {
     const h = link(b), tag = sentence(b.tag || (b.genres || [])[0] || "Featured");
-    return '<article class="pick"><a class="pick-cover" href="' + h + '" tabindex="-1" aria-hidden="true"><img src="' + safe(b.image) + '" alt="" width="300" height="450"><span class="ribbon"></span></a>' +
+    return '<article class="pick"><a class="pick-cover" href="' + h + '" tabindex="-1" aria-hidden="true" style="position:relative">' + image(b.image, "Cover of " + b.title, b.title, "cover", 'width="300" height="450"') + '<span class="ribbon"></span></a>' +
       '<div><p class="pick-genre">' + esc(tag) + '</p><h3><a href="' + h + '">' + esc(b.title) + '</a></h3><p class="by">by ' + esc(b.author) + '</p>' +
       '<p class="hook">' + esc(b.hook || "") + '</p><a class="text-link" href="' + h + '" aria-label="Why we picked ' + esc(b.title) + '">Why we picked it</a></div></article>';
   };
   const initials = n => String(n).split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join("").toUpperCase();
+  const fallback = (label, kind) => '<span class="pbh-media-fallback pbh-' + kind + '" hidden>' + esc(label) + '</span>';
+  const image = (src, alt, label, kind, attrs) => '<img src="' + safe(src) + '" alt="' + esc(alt || "") + '" loading="lazy" ' + (attrs || "") + ' onerror="this.hidden=true;this.nextElementSibling.hidden=false">' + fallback(label, kind);
+  function watchImage(img, label, kind) {
+    if (!img || img.dataset.pbhFallback) return;
+    img.dataset.pbhFallback = "1";
+    const holder = document.createElement("span");
+    holder.className = "pbh-media-fallback pbh-" + kind;
+    holder.textContent = label;
+    holder.hidden = true;
+    img.insertAdjacentElement("afterend", holder);
+    const fail = () => { img.hidden = true; holder.hidden = false; };
+    img.addEventListener("error", fail);
+    if (!img.getAttribute("src")) fail();
+    else if (img.complete && img.naturalWidth === 0) fail();
+  }
+  function ensureFallbackStyles() {
+    if ($("#pbh-media-styles")) return;
+    const style = document.createElement("style");
+    style.id = "pbh-media-styles";
+    style.textContent = '.pbh-media-fallback{box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(145deg,#0a3c48,#1d6670 58%,#c2581b);color:#fff;font-family:Georgia,serif;font-weight:600;padding:12px;overflow:hidden}.pbh-media-fallback[hidden]{display:none!important}.pbh-cover{position:absolute;inset:0;font-size:clamp(12px,2vw,20px);line-height:1.2}.pbh-avatar{width:100%;height:100%;min-height:64px;border-radius:50%;font-family:Manrope,Arial,sans-serif;font-size:20px}.pbh-feature-cover{width:100%;height:100%;min-height:300px;aspect-ratio:2/3;font-size:clamp(18px,2vw,26px);line-height:1.2}.pbh-feature-avatar{width:100%;height:100%;min-height:180px;aspect-ratio:3/4;font-family:Manrope,Arial,sans-serif;font-size:28px}';
+    document.head.appendChild(style);
+  }
 
   function paint(d) {
+    ensureFallbackStyles();
     const books = d.books || [], authors = d.authors || [];
     const current = books.filter(b => b.status === "current"), archive = books.filter(b => b.status === "archive");
     const all = current.concat(archive);
@@ -37,9 +60,9 @@
     window.PBH_CURRENT = current; window.PBH_ARCHIVE = archive; window.PBH_AUTHORS = authors;
 
     if (current.length) {
-      $$("[data-current-picks]").forEach(el => { el.innerHTML = current.map(pickRow).join(""); });
-      $$("[data-current-authors]").forEach(el => {
-        el.innerHTML = current.map(b => { const p = safe(b.photo) || safe(photoFor(b.author)); return '<a href="' + link(b) + '#author">' + (p ? '<img src="' + p + '" alt="" loading="lazy" width="240" height="240">' : "") + '<h3>' + esc(b.author) + '</h3><p>' + esc(b.title) + '</p></a>'; }).join("");
+      $("[data-current-picks]").forEach(el => { el.innerHTML = current.map(pickRow).join(""); });
+      $("[data-current-authors]").forEach(el => {
+        el.innerHTML = current.map(b => { const p = safe(b.photo) || safe(photoFor(b.author)); const ini = initials(b.author); return '<a href="' + link(b) + '#author">' + (p ? '<span style="position:relative;display:block;width:100%;aspect-ratio:1">' + image(p, "Portrait of " + b.author, ini, "avatar", 'width="240" height="240"') + '</span>' : '<span class="pbh-media-fallback pbh-avatar">' + esc(ini) + '</span>') + '<h3>' + esc(b.author) + '</h3><p>' + esc(b.title) + '</p></a>'; }).join("");
       });
     }
     if (archive.length) $$("[data-recent-rail]").forEach(el => { el.innerHTML = archive.slice(0, 14).map(coverCard).join(""); });
@@ -57,7 +80,7 @@
       ag.innerHTML = authors.slice().sort((a, b) => a.name.localeCompare(b.name)).map(a => {
         const bk = a.books || [], p = safe(a.photo) || safe(photoFor(a.name));
         const list = bk.slice(0, 2).join(" and ") + (bk.length > 2 ? " and " + (bk.length - 2) + " more" : "");
-        const media = p ? '<img src="' + p + '" alt="" loading="lazy" width="64" height="64">' : '<span class="initials" aria-hidden="true">' + esc(initials(a.name)) + '</span>';
+        const media = p ? image(p, "Portrait of " + a.name, initials(a.name), "avatar", 'width="64" height="64"') : '<span class="initials" aria-hidden="true">' + esc(initials(a.name)) + '</span>';
         const inner = media + '<div><h3>' + esc(a.name) + '</h3><p>' + esc(list) + '</p></div>', s = esc((a.name + " " + bk.join(" ")).toLowerCase());
         return safe(a.feature) ? '<a class="author-card" href="' + safe(a.feature) + '#author" data-search="' + s + '">' + inner + '</a>' : '<article class="author-card" data-search="' + s + '">' + inner + '</article>';
       }).join("");
@@ -93,7 +116,7 @@
       if (sel) {
         const t = $("[data-book-title]"); if (t && sel.title) t.textContent = sel.title;
         const h = $("[data-book-hook]"); if (h && sel.hook) h.textContent = sel.hook;
-        const c = $("[data-book-cover]"); if (c && safe(sel.image)) { c.src = sel.image; c.alt = "Cover of " + sel.title + " by " + sel.author; }
+        const c = $("[data-book-cover]"); if (c) { watchImage(c, sel.title, "feature-cover"); if (safe(sel.image)) { c.hidden = false; c.src = sel.image; c.alt = "Cover of " + sel.title + " by " + sel.author; } else { c.hidden = true; c.nextElementSibling.hidden = false; } }
         const st = $("[data-book-status] .pill");
         if (st) { const cur = sel.status === "current"; st.textContent = cur ? "Current pick" : "From the archive"; st.classList.toggle("current", cur); }
         const dt = $("[data-feature-date]"); if (dt && sel.featured_date && fmtDate(sel.featured_date)) { dt.dateTime = sel.featured_date; dt.textContent = fmtDate(sel.featured_date); }
@@ -101,7 +124,7 @@
         if (description && sel.description) description.innerHTML = String(sel.description).split("\n\n").map(p => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
         const author = authors.find(a => a.name.toLowerCase() === String(sel.author || "").toLowerCase());
         const authorPhoto = $("[data-author-photo]") || $(".author-bio img");
-        if (authorPhoto && author && safe(author.photo)) { authorPhoto.src = author.photo; authorPhoto.alt = "Portrait of " + author.name; }
+        if (authorPhoto && author) { watchImage(authorPhoto, initials(author.name), "feature-avatar"); if (safe(author.photo)) { authorPhoto.hidden = false; authorPhoto.src = author.photo; authorPhoto.alt = "Portrait of " + author.name; } else { authorPhoto.hidden = true; authorPhoto.nextElementSibling.hidden = false; } }
         const authorBio = $(".author-bio .bio");
         if (authorBio && author && author.bio) authorBio.innerHTML = "<p>" + esc(author.bio).replace(/\n/g, "<br>") + "</p>";
       }
