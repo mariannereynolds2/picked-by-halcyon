@@ -1,5 +1,49 @@
 window.PBH_AUTHORS = [
   {
+    "name": "Steven Harrison",
+    "books": [
+      "Harbinger: The Prophet's Game"
+    ],
+    "photo": "/images/featured-authors/steven-harrison.webp",
+    "feature": "/books/harbinger-the-prophets-game.html",
+    "genres": [
+      "Mystery & Thriller"
+    ]
+  },
+  {
+    "name": "Suzanne Dana",
+    "books": [
+      "The General's Wife"
+    ],
+    "photo": "/images/featured-authors/suzanne-dana.webp",
+    "feature": "/books/the-generals-wife.html",
+    "genres": [
+      "Mystery & Thriller"
+    ]
+  },
+  {
+    "name": "Dorota Chioma",
+    "books": [
+      "Between the Avalanche and the Ashes"
+    ],
+    "photo": "/images/featured-authors/dorota-chioma.webp",
+    "feature": "/books/between-the-avalanche-and-the-ashes.html",
+    "genres": [
+      "Memoir & Biography"
+    ]
+  },
+  {
+    "name": "Laurent Grenier",
+    "books": [
+      "Meditation Time: Know Yourself and the World Around You"
+    ],
+    "photo": "/images/featured-authors/laurent-grenier.webp",
+    "feature": "/books/meditation-time.html",
+    "genres": [
+      "Nonfiction"
+    ]
+  },
+  {
     "name": "Chautona Havig",
     "books": [
       "Ready or Not"

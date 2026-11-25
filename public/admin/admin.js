@@ -128,4 +128,24 @@ $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const f=e
 $("#content").addEventListener("click",async e=>{const a=e.target.closest("[data-action],[data-status-tab],[data-edit],[data-delete],[data-move],[data-export],[data-detail]");if(!a)return;if(a.hasAttribute("data-status-tab")){statusFilter=a.dataset.statusTab;draw();return}if(a.dataset.action){const v=a.dataset.action;if(v==="new-book"){edit("books");return}active=v==="today"||v==="edit-books"?"books":v;filter="";statusFilter=v==="today"?"current":"";draw();return}if(a.dataset.edit){const [entity,id]=a.dataset.edit.split(":");edit(entity,id)}if(a.dataset.delete){const[entity,id]=a.dataset.delete.split(":");await del(entity,id)}if(a.dataset.move){const[id,status]=a.dataset.move.split(":");await move(id,status)}if(a.dataset.export)exportCsv(a.dataset.export);if(a.dataset.detail){const x=store.submissions.find(y=>y.id===Number(a.dataset.detail));if(x)alert("Book: "+x.book_title+"\nAuthor: "+x.author_name+"\nEmail: "+x.email+"\nGenre: "+x.genre+"\nLink: "+x.book_link+"\nWebsite: "+x.website+"\n\nWhy it fits:\n"+x.why_fit+"\n\nSummary:\n"+x.book_summary)}});
 $("#content").addEventListener("change",async e=>{const x=e.target.closest("[data-submission]");if(!x)return;try{await request("admin",{entity:"submissions",op:"status",id:Number(x.dataset.submission),status:x.value});notify("Submission status updated.");await load()}catch(err){notify(err.message,true)}});
 load();
+
+/* ---- Forgot / reset / change password (added) ---- */
+(()=>{const lf=$("#loginForm"),ff=$("#forgotForm"),rf=$("#resetForm");
+ const show=w=>{lf.hidden=w!=="login";ff.hidden=w!=="forgot";rf.hidden=w!=="reset"};
+ $("#forgotLink").addEventListener("click",e=>{e.preventDefault();$("#forgotMsg").textContent="";show("forgot")});
+ document.querySelectorAll("[data-back]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();show("login")}));
+ ff.addEventListener("submit",async e=>{e.preventDefault();const b=ff.querySelector("button");b.disabled=true;try{await request("forgot",{});$("#forgotMsg").textContent="If email is set up, a reset link is on its way to the Halcyon inbox. Check spam too."}catch(err){$("#forgotMsg").textContent=err.message}finally{b.disabled=false}});
+ const token=new URLSearchParams(location.search).get("reset");
+ if(token){show("reset");$("#loginScreen").hidden=false}
+ rf.addEventListener("submit",async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(rf)),err=$("#resetError");err.textContent="";
+  if(d.password!==d.confirm){err.textContent="The two passwords do not match.";return}
+  const b=rf.querySelector("button");b.disabled=true;
+  try{await request("reset",{token,username:d.username,password:d.password});history.replaceState(null,"","/admin/");rf.reset();show("login");$("#loginError").textContent="Password saved. Sign in with your new details."}catch(x){err.textContent=x.message}finally{b.disabled=false}});
+ const dlg=$("#pwDialog"),pf=$("#pwForm"),pe=$("#pwError");
+ $("#changePw").addEventListener("click",()=>{pe.textContent="";pf.reset();dlg.showModal()});
+ [$("#closePw"),$("#cancelPw")].forEach(x=>x.addEventListener("click",()=>dlg.close()));
+ pf.addEventListener("submit",async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(pf));pe.textContent="";
+  if(d.password!==d.confirm){pe.textContent="The two new passwords do not match.";return}
+  try{await request("change-password",{current:d.current,username:d.username,password:d.password});dlg.close();notify("Password changed.")}catch(x){pe.textContent=x.message}});
+})();
 })();

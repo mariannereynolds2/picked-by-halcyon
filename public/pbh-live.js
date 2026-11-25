@@ -60,8 +60,8 @@
     window.PBH_CURRENT = current; window.PBH_ARCHIVE = archive; window.PBH_AUTHORS = authors;
 
     if (current.length) {
-      $("[data-current-picks]").forEach(el => { el.innerHTML = current.map(pickRow).join(""); });
-      $("[data-current-authors]").forEach(el => {
+      $$("[data-current-picks]").forEach(el => { el.innerHTML = current.map(pickRow).join(""); });
+      $$("[data-current-authors]").forEach(el => {
         el.innerHTML = current.map(b => { const p = safe(b.photo) || safe(photoFor(b.author)); const ini = initials(b.author); return '<a href="' + link(b) + '#author">' + (p ? '<span style="position:relative;display:block;width:100%;aspect-ratio:1">' + image(p, "Portrait of " + b.author, ini, "avatar", 'width="240" height="240"') + '</span>' : '<span class="pbh-media-fallback pbh-avatar">' + esc(ini) + '</span>') + '<h3>' + esc(b.author) + '</h3><p>' + esc(b.title) + '</p></a>'; }).join("");
       });
     }
