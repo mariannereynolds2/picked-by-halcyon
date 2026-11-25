@@ -185,6 +185,15 @@ export async function onRequest(context){
    queueNotice(context,"New Picked by Halcyon message"+(b.subject?" — "+cut(b.subject,80):""),[["Name",name],["Email",email],["Subject",cut(b.subject,250)],["Message",message]],email);
    return respond({ok:true});
  }
+ if(action==="image"&&method==="GET"){
+   const key=cut(url.searchParams.get("key"),80);
+   if(!/^editorial-[0-9a-f-]{36}\\.(jpg|png|webp)$/.test(key))return failure("Image not found.",404);
+   if(!env.PBH_IMAGES)return failure("Image storage is not configured.",503);
+   const object=await env.PBH_IMAGES.get(key);
+   if(!object)return failure("Image not found.",404);
+   const ext=key.split(".").pop(),type={jpg:"image/jpeg",png:"image/png",webp:"image/webp"}[ext];
+   return new Response(object.body,{headers:{"Content-Type":object.httpMetadata?.contentType||type,"Cache-Control":"public, max-age=31536000, immutable","X-Content-Type-Options":"nosniff",...(object.httpEtag?{"ETag":object.httpEtag}:{})}});
+ }
  if(action==="upload-image"&&method==="POST"){
    if(!await authorized(req,env))return failure("Login required.",401);
    if(!env.PBH_IMAGES)return failure("Image storage is not configured yet. Create an R2 bucket and bind it as PBH_IMAGES.",503);
@@ -195,7 +204,7 @@ export async function onRequest(context){
    if(!types[file.type])return failure("Images must be JPG, PNG or WebP.");
    const key="editorial-"+crypto.randomUUID()+"."+types[file.type];
    await env.PBH_IMAGES.put(key,file.stream(),{httpMetadata:{contentType:file.type,cacheControl:"public, max-age=31536000, immutable"}});
-   return respond({ok:true,url:"/media/"+key});
+   return respond({ok:true,url:"/api/pbh/image?key="+encodeURIComponent(key)});
  }
  if(action==="login"&&method==="POST"){
    if(!env.PBH_ADMIN_PASSWORD)return failure("Admin login is not configured. Add PBH_ADMIN_PASSWORD as a Cloudflare Pages secret.",503);
